@@ -1,16 +1,28 @@
 import { Link } from "react-router-dom";
 
+import Logo from "./Logo.jsx";
+
 function Header() {
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-            M
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-slate-900">MockMate</span>
+    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+        <Link to="/">
+          <Logo />
         </Link>
-        <span className="hidden text-sm text-slate-500 sm:block">AI-powered mock interviews</span>
+        <div className="flex items-center gap-5">
+          <a
+            href="/#how-it-works"
+            className="hidden text-sm font-medium text-slate-300 transition hover:text-white sm:block"
+          >
+            How it works
+          </a>
+          <a
+            href="/#start-form"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:bg-brand-500"
+          >
+            Practice now
+          </a>
+        </div>
       </div>
     </header>
   );
