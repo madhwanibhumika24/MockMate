@@ -1,77 +1,170 @@
-const FEATURES = [
-  {
-    title: "Tailored questions",
-    description: "Generated from the role, job description, and your resume -- not generic templates.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M12 3v3m0 12v3M4.2 4.2l2.1 2.1m11.4 11.4l2.1 2.1M3 12h3m12 0h3M4.2 19.8l2.1-2.1m11.4-11.4l2.1-2.1"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-        <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.8" />
-      </svg>
-    ),
-  },
-  {
-    title: "Structured feedback",
-    description: "A clear summary, concrete strengths, and specific things to improve -- not just a score.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M9 12.5l2 2 4.5-5M12 3l7.5 4.5v6L12 21l-7.5-7.5v-6L12 3z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Practice at your pace",
-    description: "Answer one question at a time, in your own words, whenever you have a few minutes.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M12 7.5V12l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-];
+import { Link } from "react-router-dom";
+
+const HEADING_LINE_1 = "Practice like it's the real thing";
+const HEADING_LINE_2 = "so the real thing feels easy";
+const LETTER_STEP = 0.028;
+
+// Splits a line into per-letter <span>s (grouped by word, so a word never
+// wraps mid-letter) with a staggered animation-delay, left to right. Pure
+// CSS handles the actual animation, so this stays cheap even for longer
+// headlines -- no timers, no re-renders.
+function renderAnimatedWords(text, startIndex) {
+  let index = startIndex;
+  const words = text.split(" ");
+  const nodes = [];
+
+  words.forEach((word, wordIndex) => {
+    const letters = word.split("").map((char, charIndex) => {
+      const delay = index * LETTER_STEP;
+      index += 1;
+      return (
+        <span key={charIndex} className="letter-reveal" style={{ animationDelay: `${delay}s` }}>
+          {char}
+        </span>
+      );
+    });
+    index += 1; // reserve a beat for the space after this word
+
+    nodes.push(
+      <span key={`word-${wordIndex}`} className="inline-block whitespace-nowrap">
+        {letters}
+      </span>,
+    );
+
+    // Pushed as its own sibling (not inside the nowrap word span) so it's a
+    // real breakable space between words instead of trailing whitespace
+    // that gets collapsed away inside an inline-block box.
+    if (wordIndex < words.length - 1) {
+      nodes.push(" ");
+    }
+  });
+
+  return { nodes, nextIndex: index };
+}
+
+// A small illustrative preview of what a session looks like -- fills the
+// empty space beside the hero copy on wide screens and shows, rather than
+// just tells, what MockMate does.
+function SamplePreviewCard() {
+  return (
+    <div className="animate-float card mx-auto max-w-sm rotate-1 shadow-xl">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <p className="text-xs font-medium text-slate-400">Frontend Engineer &middot; Session complete</p>
+          <p className="mt-0.5 text-sm font-semibold text-slate-900">Your feedback is ready</p>
+        </div>
+        <div className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-4 ring-brand-100">
+          82
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Strengths</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              Clear structure
+            </span>
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              Concrete example
+            </span>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Improve</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+              Quantify impact
+            </span>
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">Slow down</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-left text-sm text-slate-600">
+        &ldquo;Clear, well-structured answer with a strong technical example -- next time, tie it back to business
+        impact.&rdquo;
+      </div>
+    </div>
+  );
+}
 
 function Hero() {
-  return (
-    <div className="animate-fade-up">
-      <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
-        Practice makes prepared
-      </span>
-      <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
-        Walk into your next interview{" "}
-        <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
-          already prepared
-        </span>
-      </h1>
-      <p className="mt-5 max-w-lg text-lg text-slate-600">
-        Tell MockMate the role you're targeting and it generates tailored
-        interview questions, then gives you structured feedback on how you
-        answered.
-      </p>
+  const line1 = renderAnimatedWords(HEADING_LINE_1, 0);
+  // Line 2 reveals as one gradient-clipped unit right after line 1 finishes
+  // typing -- splitting *that* line into transformed per-letter spans
+  // breaks background-clip: text in Chrome, so it stays a single node.
+  const line2Delay = line1.nextIndex * LETTER_STEP + 0.05;
+  const contentDelay = line2Delay + 0.5;
 
-      <ul className="mt-10 space-y-6">
-        {FEATURES.map((feature) => (
-          <li key={feature.title} className="flex items-start gap-4">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/30">
-              {feature.icon}
-            </span>
-            <div>
-              <p className="font-semibold text-slate-900">{feature.title}</p>
-              <p className="mt-0.5 text-sm text-slate-600">{feature.description}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
+  return (
+    <div className="mx-auto grid max-w-5xl items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
+      <div className="text-center lg:text-left">
+        <span className="animate-fade-up inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
+          Practice makes prepared
+        </span>
+
+        <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
+          <span className="block">{line1.nodes}</span>
+          <span
+            className="animate-fade-up block bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent"
+            style={{ animationDelay: `${line2Delay}s` }}
+          >
+            {HEADING_LINE_2}
+          </span>
+        </h1>
+
+        <p
+          className="animate-fade-up mx-auto mt-5 max-w-xl text-lg text-slate-600 lg:mx-0"
+          style={{ animationDelay: `${contentDelay}s` }}
+        >
+          Tell MockMate the role you're targeting and it generates tailored
+          interview questions, then gives you structured feedback on how you
+          answered.
+        </p>
+
+        <div
+          className="animate-fade-up mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
+          style={{ animationDelay: `${contentDelay + 0.12}s` }}
+        >
+          <Link
+            to="/login"
+            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-md"
+          >
+            Start a mock interview
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+            >
+              <path
+                d="M5 12h14m0 0l-6-6m6 6l-6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <a href="/#features" className="text-sm font-semibold text-slate-600 transition hover:text-brand-600">
+            See what's included
+          </a>
+        </div>
+
+        <blockquote
+          className="animate-fade-up mx-auto mt-12 max-w-md border-l-4 border-brand-400 pl-4 text-left lg:mx-0"
+          style={{ animationDelay: `${contentDelay + 0.24}s` }}
+        >
+          <p className="text-base italic text-slate-600">
+            &ldquo;Success is where preparation and opportunity meet.&rdquo;
+          </p>
+          <footer className="mt-1 text-sm text-slate-400">&mdash; Bobby Unser</footer>
+        </blockquote>
+      </div>
+
+      <div className="animate-fade-up hidden lg:block" style={{ animationDelay: `${contentDelay + 0.1}s` }}>
+        <SamplePreviewCard />
+      </div>
     </div>
   );
 }
