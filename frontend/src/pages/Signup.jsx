@@ -3,8 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 
 import AuthLayout from "../components/auth/AuthLayout.jsx";
 import Button from "../components/common/Button.jsx";
+import { googleLoginUrl, githubLoginUrl } from "../services/api.js";
+import { useAuth } from "../store/AuthContext.jsx";
 
 function Signup() {
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,7 +16,7 @@ function Signup() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!name.trim() || !email.trim() || !password) {
       setError("Please fill in all fields.");
@@ -23,14 +26,20 @@ function Signup() {
       setError("Passwords don't match.");
       return;
     }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     setError("");
     setSubmitting(true);
-    navigate("/start");
-  };
-
-  const handleOAuth = () => {
-    // TODO: swap for a real OAuth redirect once a provider is wired up on the backend.
-    navigate("/start");
+    try {
+      await signup({ email: email.trim(), password, full_name: name.trim() });
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Couldn't create your account. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -38,7 +47,9 @@ function Signup() {
       eyebrow="Get started"
       title="Create your account"
       description="Create an account to start practicing in minutes."
-      onOAuth={handleOAuth}
+      onOAuth={(provider) => {
+        window.location.href = provider === "google" ? googleLoginUrl : githubLoginUrl;
+      }}
       footer={
         <>
           Already have an account?{" "}

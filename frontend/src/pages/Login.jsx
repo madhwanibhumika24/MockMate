@@ -1,17 +1,30 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import AuthLayout from "../components/auth/AuthLayout.jsx";
 import Button from "../components/common/Button.jsx";
+import { googleLoginUrl, githubLoginUrl } from "../services/api.js";
+import { useAuth } from "../store/AuthContext.jsx";
+
+const OAUTH_ERROR_MESSAGES = {
+  google_failed: "Something went wrong signing in with Google. Please try again.",
+  github_failed: "Something went wrong signing in with GitHub. Please try again.",
+};
 
 function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(OAUTH_ERROR_MESSAGES[searchParams.get("error")] || "");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (event) => {
+  const redirectTo = location.state?.from?.pathname || "/dashboard";
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!email.trim() || !password) {
       setError("Please enter your email and password.");
@@ -19,12 +32,14 @@ function Login() {
     }
     setError("");
     setSubmitting(true);
-    navigate("/start");
-  };
-
-  const handleOAuth = () => {
-    // TODO: swap for a real OAuth redirect once a provider is wired up on the backend.
-    navigate("/start");
+    try {
+      await login(email.trim(), password);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(err.response?.data?.detail || "Couldn't log in. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -32,7 +47,9 @@ function Login() {
       eyebrow="Welcome back"
       title="Log in to MockMate"
       description="Log in to pick up your mock interview practice right where you left off."
-      onOAuth={handleOAuth}
+      onOAuth={(provider) => {
+        window.location.href = provider === "google" ? googleLoginUrl : githubLoginUrl;
+      }}
       footer={
         <>
           New to MockMate?{" "}
