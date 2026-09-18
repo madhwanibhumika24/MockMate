@@ -51,6 +51,9 @@ from app.db.base import Base
 # DB-level enum) so SQLite stays simple and new statuses don't need a migration.
 SESSION_STATUSES = ("created", "in_progress", "completed")
 
+# Allowed values for InterviewSession.difficulty.
+DIFFICULTY_LEVELS = ("easy", "medium", "hard")
+
 # Allowed values for User.auth_provider.
 AUTH_PROVIDERS = ("local", "google", "github")
 
@@ -172,6 +175,11 @@ class InterviewSession(Base):
     # we store the extracted text plus the original filename for display.
     resume_text = Column(Text, nullable=True)
     resume_filename = Column(String, nullable=True)
+
+    # Drives both question difficulty and the fixed stage structure (intro ->
+    # resume walkthrough -> fundamentals -> OOP -> problem solving) -- see
+    # app/services/interview_service.py.
+    difficulty = Column(String(20), default="medium", nullable=False)
 
     status = Column(String, default="created", nullable=False)
 

@@ -16,8 +16,9 @@ export const uploadResume = (file) => {
   return apiClient.post("/resume/upload", formData);
 };
 
-// payload: { role, job_description?, resume_text?, resume_filename? }
-// Returns the created session, e.g. { id, role, job_description, status, created_at, completed_at }
+// payload: { role, job_description?, resume_text?, resume_filename?, difficulty? }
+// ("easy" | "medium" | "hard", defaults to "medium" server-side if omitted)
+// Returns the created session, e.g. { id, role, job_description, difficulty, status, created_at, completed_at }
 export const createInterviewSession = (payload) =>
   apiClient.post("/interview/sessions", payload);
 

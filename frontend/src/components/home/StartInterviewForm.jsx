@@ -13,6 +13,7 @@ function StartInterviewForm() {
   const [customRole, setCustomRole] = useState("");
 
   const [jobDescription, setJobDescription] = useState("");
+  const [difficulty, setDifficulty] = useState("medium");
   const [resumeFile, setResumeFile] = useState(null);
   const [resumeText, setResumeText] = useState("");
   const [parsingResume, setParsingResume] = useState(false);
@@ -80,6 +81,7 @@ function StartInterviewForm() {
         job_description: jobDescription.trim() || null,
         resume_text: resumeText || null,
         resume_filename: resumeFile?.name || null,
+        difficulty,
       });
       navigate(`/interview/${data.id}`);
     } catch (err) {
@@ -92,7 +94,7 @@ function StartInterviewForm() {
     <form
       id="start-form"
       onSubmit={handleSubmit}
-      className="card animate-fade-up-delay-1 scroll-mt-24 lg:sticky lg:top-24"
+      className="card animate-fade-up-delay-1"
     >
       <h2 className="text-lg font-bold text-slate-900">Start a mock interview</h2>
       <p className="mt-1 text-sm text-slate-500">Takes about a minute to set up.</p>
@@ -175,6 +177,22 @@ function StartInterviewForm() {
             placeholder="Paste the job description here for more targeted questions"
             className="input-field resize-none"
           />
+        </div>
+
+        <div>
+          <label htmlFor="difficulty" className="field-label">
+            Difficulty
+          </label>
+          <select
+            id="difficulty"
+            value={difficulty}
+            onChange={(event) => setDifficulty(event.target.value)}
+            className="input-field"
+          >
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
         </div>
 
         <div>

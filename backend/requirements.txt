@@ -1,6 +1,6 @@
 fastapi==0.111.0
 uvicorn[standard]==0.30.1
-pydantic==2.7.4
+pydantic==2.12.5  # bumped from 2.7.4: google-genai requires pydantic>=2.12.5
 pydantic-settings==2.3.4
 sqlalchemy==2.0.31
 pymysql==1.1.1
@@ -9,13 +9,12 @@ python-dotenv==1.0.1
 python-multipart==0.0.9
 pypdf==4.2.0
 python-docx==1.1.2
-langchain==0.2.6
-langchain-community==0.2.6
-langchain-openai==0.1.13
-openai==1.35.10
+google-genai==2.24.0
 alembic==1.13.2
 pytest==8.2.2
-httpx==0.27.0
+httpx==0.28.1  # bumped from 0.27.0: google-genai requires httpx>=0.28.1
+bcrypt==4.0.1
+PyJWT==2.8.0
 
 # Deferred: chromadb / langchain-chroma need a C++ compiler to build on
 # Windows (chroma-hnswlib has no prebuilt wheel for this Python version).
@@ -24,3 +23,14 @@ httpx==0.27.0
 # needed only once we actually start building the RAG/vector-search feature.
 # chromadb==0.5.3
 # langchain-chroma==0.1.2
+
+# Deferred: langchain / langchain-community / langchain-openai dropped
+# entirely (not just for RAG) -- langchain_openai pulls in tiktoken, whose
+# native _tiktoken module gets blocked by this machine's Application Control
+# policy. interview_service.py / feedback_service.py now call the plain
+# `openai` package directly instead, which has no tiktoken dependency for
+# this use case. If RAG work resumes, wire embeddings via `openai` directly
+# too rather than langchain_openai.OpenAIEmbeddings, for the same reason.
+# langchain==0.2.6
+# langchain-community==0.2.6
+# langchain-openai==0.1.13

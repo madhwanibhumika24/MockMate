@@ -16,6 +16,7 @@ class InterviewSessionCreate(BaseModel):
     job_description: Optional[str] = None
     resume_text: Optional[str] = None
     resume_filename: Optional[str] = None
+    difficulty: str = "medium"  # "easy" | "medium" | "hard"
 
 
 class InterviewSessionResponse(BaseModel):
@@ -24,6 +25,7 @@ class InterviewSessionResponse(BaseModel):
     id: int
     role: str
     job_description: Optional[str] = None
+    difficulty: str
     status: str
     created_at: datetime
     completed_at: Optional[datetime] = None
@@ -36,6 +38,7 @@ class InterviewSessionSummary(BaseModel):
 
     id: int
     role: str
+    difficulty: str
     status: str
     created_at: datetime
     completed_at: Optional[datetime] = None

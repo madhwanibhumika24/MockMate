@@ -2,9 +2,9 @@
 
 import json
 from functools import lru_cache
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
-from langchain_openai import ChatOpenAI
+from google import genai
 
 from app.core.config import get_settings
 
@@ -26,16 +26,16 @@ Job description:
 
 
 @lru_cache
-def _get_llm(temperature: float = 0.3) -> ChatOpenAI:
+def _get_client() -> genai.Client:
     settings = get_settings()
-    if not settings.openai_api_key:
+    if not settings.google_api_key:
         raise RuntimeError(
-            "OPENAI_API_KEY is not set. Add it to backend/.env to generate feedback."
+            "GOOGLE_API_KEY is not set. Add it to backend/.env to generate feedback."
         )
-    return ChatOpenAI(model="gpt-4o-mini", api_key=settings.openai_api_key, temperature=temperature)
+    return genai.Client(api_key=settings.google_api_key)
 
 
-def generate_feedback(role: str, job_description: str | None, qa_pairs: List[Tuple[str, str]]) -> dict:
+def generate_feedback(role: str, job_description: Optional[str], qa_pairs: List[Tuple[str, str]]) -> dict:
     """Generates structured feedback for a completed interview session.
 
     `qa_pairs` is the full [(question, answer), ...] transcript. Returns a
@@ -50,7 +50,8 @@ def generate_feedback(role: str, job_description: str | None, qa_pairs: List[Tup
     if not qa_pairs:
         raise ValueError("Cannot generate feedback for a session with no answered questions")
 
-    llm = _get_llm()
+    client = _get_client()
+    settings = get_settings()
 
     system_prompt = FEEDBACK_SYSTEM_PROMPT.format(
         role=role,
@@ -58,13 +59,14 @@ def generate_feedback(role: str, job_description: str | None, qa_pairs: List[Tup
     )
     transcript = "\n\n".join(f"Q: {q}\nA: {a}" for q, a in qa_pairs)
 
-    messages = [
-        ("system", system_prompt),
-        ("human", transcript),
-    ]
-
-    response = llm.invoke(messages)
-    content = response.content.strip()
+    interaction = client.interactions.create(
+        model=settings.gemini_model,
+        system_instruction=system_prompt,
+        input=transcript,
+        generation_config={"temperature": 0.3},
+        response_format={"mime_type": "application/json"},
+    )
+    content = interaction.output_text.strip()
 
     try:
         data = json.loads(content)
