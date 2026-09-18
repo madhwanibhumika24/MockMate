@@ -105,7 +105,13 @@ function Dashboard() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <ProfileMenu user={user} profile={profile} onLogout={handleLogout} onProfileUpdate={setProfile} />
+            <ProfileMenu
+              user={user}
+              profile={profile}
+              sessions={sessions}
+              onLogout={handleLogout}
+              onProfileUpdate={setProfile}
+            />
             <button
               type="button"
               onClick={handleLogout}

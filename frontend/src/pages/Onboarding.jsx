@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Button from "../components/common/Button.jsx";
 import Logo from "../components/common/Logo.jsx";
-import { skipOnboarding, updateMyProfile } from "../services/api.js";
+import { getMyProfile, skipOnboarding, updateMyProfile } from "../services/api.js";
 import { useAuth } from "../store/AuthContext.jsx";
 
 const EDUCATION_LEVELS = ["High school", "Bachelor's", "Master's", "PhD", "Other"];
@@ -47,9 +47,38 @@ function Onboarding() {
   const [graduationYear, setGraduationYear] = useState("");
   const [targetRole, setTargetRole] = useState("");
 
+  // Whether we're editing an already-completed profile (reached via "Edit
+  // profile" in the dashboard menu) rather than doing first-time onboarding.
+  const [isEditing, setIsEditing] = useState(false);
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [skipping, setSkipping] = useState(false);
+
+  // Pre-fill the form if a profile already exists -- otherwise re-saving
+  // here would silently wipe out everything the user had already entered.
+  useEffect(() => {
+    let cancelled = false;
+    getMyProfile()
+      .then(({ data }) => {
+        if (cancelled || !data.employment_status) return;
+        setIsEditing(true);
+        setEmploymentStatus(data.employment_status || "");
+        setCurrentRole(data.current_role || "");
+        setCompany(data.company || "");
+        setYearsExperience(data.years_experience ?? "");
+        setEducationLevel(data.education_level || "");
+        setFieldOfStudy(data.field_of_study || "");
+        setGraduationYear(data.graduation_year ?? "");
+        setTargetRole(data.target_role || "");
+      })
+      .catch(() => {
+        // No profile yet (or not reachable) -- fall back to a blank form.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSkip = async () => {
     setError("");
@@ -101,11 +130,12 @@ function Onboarding() {
         <div className="mb-8 text-center">
           <Logo dark={false} className="justify-center" />
           <h1 className="mt-5 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Tell us a bit about yourself
+            {isEditing ? "Update your profile" : "Tell us a bit about yourself"}
           </h1>
           <p className="mt-2 text-slate-600">
-            This helps us tailor your practice questions. Totally optional -- you can skip and add
-            it later from your profile.
+            {isEditing
+              ? "Keep your info up to date so practice questions stay relevant."
+              : "This helps us tailor your practice questions. Totally optional -- you can skip and add it later from your profile."}
           </p>
         </div>
 
@@ -241,16 +271,20 @@ function Onboarding() {
           {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
           <div className="flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-between">
-            <button
-              type="button"
-              onClick={handleSkip}
-              disabled={skipping || submitting}
-              className="text-sm font-semibold text-slate-500 hover:text-slate-700 disabled:text-slate-300"
-            >
-              Skip for now
-            </button>
+            {isEditing ? (
+              <span />
+            ) : (
+              <button
+                type="button"
+                onClick={handleSkip}
+                disabled={skipping || submitting}
+                className="text-sm font-semibold text-slate-500 hover:text-slate-700 disabled:text-slate-300"
+              >
+                Skip for now
+              </button>
+            )}
             <Button type="submit" loading={submitting} disabled={skipping} className="w-full sm:w-auto">
-              Continue
+              {isEditing ? "Save changes" : "Continue"}
             </Button>
           </div>
         </form>
