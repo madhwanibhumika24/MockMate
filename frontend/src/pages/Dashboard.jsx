@@ -1,0 +1,156 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import ProfileMenu from "../components/dashboard/ProfileMenu.jsx";
+import InterviewHistory from "../components/dashboard/InterviewHistory.jsx";
+import StatsSummary from "../components/dashboard/StatsSummary.jsx";
+import Logo from "../components/common/Logo.jsx";
+import { getMyProfile, listInterviewSessions } from "../services/api.js";
+import { useAuth } from "../store/AuthContext.jsx";
+
+const TABS = [
+  { id: "interview", label: "Practice Interview" },
+  { id: "assessments", label: "Assessments" },
+];
+
+function InterviewTab({ sessions, sessionsLoading }) {
+  return (
+    <div>
+      <div className="card flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900">Start a new mock interview</h3>
+          <p className="mt-1 text-sm text-slate-600">
+            Pick a role, get AI-generated questions, and receive structured feedback afterward.
+          </p>
+        </div>
+        <Link
+          to="/start"
+          className="inline-flex flex-none items-center justify-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:bg-brand-700"
+        >
+          Start Interview
+        </Link>
+      </div>
+
+      <InterviewHistory sessions={sessions} loading={sessionsLoading} />
+    </div>
+  );
+}
+
+function AssessmentsTab() {
+  return (
+    <div className="card flex flex-col items-center justify-center gap-2 py-12 text-center">
+      <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+        Coming soon
+      </span>
+      <h3 className="text-lg font-semibold text-slate-900">Skill assessments</h3>
+      <p className="max-w-sm text-sm text-slate-600">
+        Timed, role-specific assessments to benchmark your skills are on the way.
+      </p>
+    </div>
+  );
+}
+
+function Dashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(TABS[0].id);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyProfile()
+      .then(({ data }) => {
+        if (!cancelled) setProfile(data);
+      })
+      .catch(() => {
+        if (!cancelled) setProfile(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    listInterviewSessions()
+      .then(({ data }) => {
+        if (!cancelled) setSessions(data);
+      })
+      .catch(() => {
+        if (!cancelled) setSessions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSessionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
+
+  const firstName = user.full_name?.split(" ")[0] || user.email;
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
+          <Link to="/dashboard">
+            <Logo dark={false} />
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <ProfileMenu user={user} profile={profile} onLogout={handleLogout} onProfileUpdate={setProfile} />
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            >
+              Log out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Welcome back, {firstName}</h1>
+        <p className="mt-1 text-slate-600">Ready to sharpen your interview skills?</p>
+
+        <StatsSummary sessions={sessions} />
+
+        <div className="mt-8 border-b border-slate-200">
+          <nav className="flex gap-6">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`border-b-2 pb-3 text-sm font-semibold transition ${
+                  activeTab === tab.id
+                    ? "border-brand-600 text-brand-700"
+                    : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="mt-6">
+          {activeTab === "interview" && (
+            <InterviewTab sessions={sessions} sessionsLoading={sessionsLoading} />
+          )}
+          {activeTab === "assessments" && <AssessmentsTab />}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Dashboard;
