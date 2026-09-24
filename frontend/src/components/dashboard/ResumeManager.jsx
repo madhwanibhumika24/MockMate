@@ -38,17 +38,21 @@ function ResumeAnalysisSummary({ analysis }) {
   if (!hasAnything) return null;
 
   return (
-    <div className="mt-4 border-t border-slate-100 pt-4">
-      <p className="text-sm font-semibold text-slate-900">What we found in your resume</p>
-      <AnalysisChips label="Skills" items={analysis.skills} />
-      <AnalysisChips label="Education" items={analysis.education} />
-      <AnalysisChips label="Projects" items={projectNames} />
-      <AnalysisChips label="Experience" items={experienceRoles} />
-      <AnalysisChips label="Certifications" items={analysis.certifications} />
-      <p className="mt-2 text-xs text-slate-400">
-        This is used to keep resume-based interview questions grounded in what's actually on your resume.
-      </p>
-    </div>
+    <details className="mt-3 border-t border-slate-100 pt-3">
+      <summary className="cursor-pointer list-none text-sm font-semibold text-brand-600 marker:content-none hover:text-brand-700">
+        View what we found in your resume
+      </summary>
+      <div className="mt-3">
+        <AnalysisChips label="Skills" items={analysis.skills} />
+        <AnalysisChips label="Education" items={analysis.education} />
+        <AnalysisChips label="Projects" items={projectNames} />
+        <AnalysisChips label="Experience" items={experienceRoles} />
+        <AnalysisChips label="Certifications" items={analysis.certifications} />
+        <p className="mt-2 text-xs text-slate-400">
+          This is used to keep resume-based interview questions grounded in what's actually on your resume.
+        </p>
+      </div>
+    </details>
   );
 }
 
