@@ -8,6 +8,7 @@ import StatsSummary from "../components/dashboard/StatsSummary.jsx";
 import ReadinessInsights from "../components/dashboard/ReadinessInsights.jsx";
 import AskAI from "../components/dashboard/AskAI.jsx";
 import Logo from "../components/common/Logo.jsx";
+import ConfirmDialog from "../components/common/ConfirmDialog.jsx";
 import { getMyProfile, listInterviewSessions } from "../services/api.js";
 import { useAuth } from "../store/AuthContext.jsx";
 
@@ -61,6 +62,8 @@ function Dashboard() {
   const [sessions, setSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(TABS[0].id);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,8 +96,21 @@ function Dashboard() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutConfirm(false);
+    setLoggingOut(true);
+
+    // Keep the "Logging out..." screen up for at least 5 seconds, even
+    // though the actual logout call is usually much faster -- runs the
+    // real logout and the timer side by side rather than one after the
+    // other, so it never takes longer than necessary either.
+    const minDisplayTime = new Promise((resolve) => window.setTimeout(resolve, 5000));
+    await Promise.all([logout(), minDisplayTime]);
+
     navigate("/");
   };
 
@@ -109,13 +125,21 @@ function Dashboard() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <ProfileMenu user={user} profile={profile} sessions={sessions} onLogout={handleLogout} />
+            <ProfileMenu
+              user={user}
+              profile={profile}
+              sessions={sessions}
+              onLogout={handleLogout}
+              loggingOut={loggingOut}
+            />
             <button
               type="button"
               onClick={handleLogout}
-              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              disabled={loggingOut}
+              className="relative overflow-hidden rounded-lg border border-red-300/50 bg-red-400/15 px-4 py-2 text-sm font-semibold text-red-600 shadow-sm shadow-red-900/5 backdrop-blur-md transition hover:bg-red-400/25 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Log out
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-lg bg-gradient-to-b from-white/50 to-transparent" />
+              <span className="relative z-10">{loggingOut ? "Logging out..." : "Log out"}</span>
             </button>
           </div>
         </div>
@@ -158,6 +182,22 @@ function Dashboard() {
           {activeTab === "assessments" && <AssessmentsTab />}
         </div>
       </main>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        title="Log out?"
+        message="Are you sure you want to log out?"
+        confirmLabel="Log out"
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
+
+      {loggingOut && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white/90 backdrop-blur-sm">
+          <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-red-100 border-t-red-500" />
+          <p className="text-sm font-semibold text-slate-600">Logging out...</p>
+        </div>
+      )}
     </div>
   );
 }

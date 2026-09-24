@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { deleteMyResume, updateMyResume, uploadResume } from "../../services/api.js";
 import { computeInterviewStats } from "../../utils/interviewStats.js";
 
 const EMPLOYMENT_LABELS = {
@@ -24,96 +23,7 @@ function formatDate(value) {
   });
 }
 
-function ResumeSection({ profile, onProfileUpdate }) {
-  const fileInputRef = useRef(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleFileChange = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = ""; // allow re-selecting the same file later
-    if (!file) return;
-
-    setBusy(true);
-    setError("");
-    try {
-      const { data: parsed } = await uploadResume(file);
-      const { data: updatedProfile } = await updateMyResume({
-        resume_text: parsed.resume_text,
-        resume_filename: file.name,
-      });
-      onProfileUpdate(updatedProfile);
-    } catch (err) {
-      setError(err.response?.data?.detail || "Couldn't upload that resume. Try a different file.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleRemove = async () => {
-    setBusy(true);
-    setError("");
-    try {
-      const { data: updatedProfile } = await deleteMyResume();
-      onProfileUpdate(updatedProfile);
-    } catch {
-      setError("Couldn't remove the resume. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="border-t border-slate-100 py-3 text-sm">
-      <p className="mb-1.5 font-medium text-slate-700">Resume</p>
-
-      {profile?.resume_filename ? (
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-slate-500">{profile.resume_filename}</span>
-          <div className="flex flex-none gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => fileInputRef.current?.click()}
-              className="font-semibold text-brand-600 hover:text-brand-700 disabled:opacity-50"
-            >
-              Replace
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={handleRemove}
-              className="font-semibold text-red-500 hover:text-red-600 disabled:opacity-50"
-            >
-              Remove
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => fileInputRef.current?.click()}
-          className="font-semibold text-brand-600 hover:text-brand-700 disabled:opacity-50"
-        >
-          {busy ? "Uploading..." : "Upload resume"}
-        </button>
-      )}
-
-      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.doc,.docx,.txt"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-    </div>
-  );
-}
-
-function ProfileMenu({ user, profile, sessions = [], onLogout, onProfileUpdate }) {
+function ProfileMenu({ user, profile, sessions = [], onLogout, loggingOut = false }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -217,14 +127,14 @@ function ProfileMenu({ user, profile, sessions = [], onLogout, onProfileUpdate }
             <p className="mt-0.5">Signs in with {signInMethod}</p>
           </div>
 
-          <ResumeSection profile={profile} onProfileUpdate={onProfileUpdate} />
-
           <button
             type="button"
             onClick={onLogout}
-            className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            disabled={loggingOut}
+            className="relative mt-3 w-full overflow-hidden rounded-lg border border-red-300/50 bg-red-400/15 px-3 py-2 text-left text-sm font-medium text-red-600 shadow-sm shadow-red-900/5 backdrop-blur-md transition hover:bg-red-400/25 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Log out
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-lg bg-gradient-to-b from-white/50 to-transparent" />
+            <span className="relative z-10">{loggingOut ? "Logging out..." : "Log out"}</span>
           </button>
         </div>
       )}
