@@ -7,6 +7,7 @@ import InterviewRoomHeader from "../components/interview/InterviewRoomHeader.jsx
 import { getInterviewSession, getSessionQuestions, submitAnswer } from "../services/api.js";
 import { isRecognitionSupported, startRecognition } from "../services/speechToText.js";
 import { cancelSpeech, isSpeechSupported, pauseSpeech, resumeSpeech, speak } from "../services/textToSpeech.js";
+import { MicIcon, PauseIcon, PlayIcon, ReplayIcon } from "../components/interview/VoiceIcons.jsx";
 
 const TOTAL_QUESTIONS = 5; // mirrors MAX_QUESTIONS_PER_SESSION on the backend
 
@@ -251,24 +252,34 @@ function Interview() {
             <div>
               <ChatBubble from="ai">{currentQuestion.question_text}</ChatBubble>
               {voiceSupported && (
-                <div className="mt-2 flex flex-wrap items-center gap-4 pl-1 text-xs">
-                  <button
-                    type="button"
-                    onClick={handlePauseResume}
-                    disabled={speechStatus === "idle"}
-                    className="font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300"
-                  >
-                    {speechStatus === "paused" ? "Play" : "Pause"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleReplay}
-                    className="font-semibold text-slate-500 transition hover:text-slate-800"
-                  >
-                    Replay
-                  </button>
-                  {speechStatus === "speaking" && <span className="italic text-slate-400">Speaking...</span>}
-                  {speechStatus === "paused" && <span className="italic text-slate-400">Paused</span>}
+                <div className="ml-9 mt-2 flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={handlePauseResume}
+                      disabled={speechStatus === "idle"}
+                      title={speechStatus === "paused" ? "Play" : "Pause"}
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                    >
+                      {speechStatus === "paused" ? (
+                        <PlayIcon className="h-3.5 w-3.5" />
+                      ) : (
+                        <PauseIcon className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReplay}
+                      title="Replay"
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                    >
+                      <ReplayIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  {speechStatus === "speaking" && (
+                    <span className="text-xs italic text-slate-400">Speaking...</span>
+                  )}
+                  {speechStatus === "paused" && <span className="text-xs italic text-slate-400">Paused</span>}
                 </div>
               )}
             </div>
@@ -291,7 +302,11 @@ function Interview() {
                       : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  {listening && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />}
+                  {listening ? (
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                  ) : (
+                    <MicIcon className="h-3.5 w-3.5" />
+                  )}
                   {listening ? "Listening..." : "Start Speaking"}
                 </button>
               )}

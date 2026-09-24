@@ -25,7 +25,7 @@ function InterviewRoomHeader({ role, interviewType, difficulty, questionNumber, 
           Question {questionNumber} of {totalQuestions}
         </span>
       </div>
-      <div className="h-1 w-full overflow-hidden bg-slate-100">
+      <div className="h-1.5 w-full overflow-hidden bg-slate-100">
         <div className="h-full bg-brand-600 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
     </header>
