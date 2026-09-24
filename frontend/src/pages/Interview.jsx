@@ -1,19 +1,33 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import Button from "../components/common/Button.jsx";
 import ChatBubble from "../components/interview/ChatBubble.jsx";
 import InterviewRoomHeader from "../components/interview/InterviewRoomHeader.jsx";
-import { getInterviewSession, getSessionQuestions, submitAnswer } from "../services/api.js";
+import { endInterviewSession, getInterviewSession, getSessionQuestions, submitAnswer } from "../services/api.js";
 import { isRecognitionSupported, startRecognition } from "../services/speechToText.js";
 import { cancelSpeech, isSpeechSupported, pauseSpeech, resumeSpeech, speak } from "../services/textToSpeech.js";
 import { MicIcon, PauseIcon, PlayIcon, ReplayIcon, StopIcon } from "../components/interview/VoiceIcons.jsx";
+import { SETUP_DURATIONS } from "../utils/roleOptions.js";
 
 const TOTAL_QUESTIONS = 5; // mirrors MAX_QUESTIONS_PER_SESSION on the backend
 
-// Phase 2 -- Feature 4 (room shell) + Feature 9 (AI voice output) +
-// Feature 11/12/13 (student voice input, live transcript, text fallback).
-// Data-fetching/submit logic is unchanged from Feature 4.
+// Used when a session is opened without the setup screen's router state
+// (e.g. a page refresh, or a direct link) -- matches InterviewSetup's own
+// default duration so the timer still shows something sensible.
+const DEFAULT_DURATION_MINUTES = SETUP_DURATIONS[1];
+
+// mm:ss, e.g. 125 -> "2:05". Never negative -- callers clamp secondsLeft to 0.
+function formatTime(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+// Phase 2 -- Feature 4 (room shell) + Feature 5 (interview timer) +
+// Feature 9 (AI voice output) + Feature 11/12/13 (student voice input, live
+// transcript, text fallback). Data-fetching/submit logic is unchanged from
+// Feature 4.
 //
 // Voice input: tapping the mic starts the browser's built-in speech
 // recognition; interim (not-yet-final) words show in a separate, visually
@@ -24,12 +38,20 @@ const TOTAL_QUESTIONS = 5; // mirrors MAX_QUESTIONS_PER_SESSION on the backend
 // browser doesn't support it, or mic permission is denied, the mic button
 // is hidden/disabled and a small message explains it -- text still works.
 //
-// The live timer (Feature 5), the "thinking" state before a question
-// appears (Feature 7), and progressive live subtitles while the AI is
-// speaking (Feature 10) are separate, later passes.
+// Timer: counts down from the duration chosen on the setup screen. Right
+// now it's a hard cap layered on top of the backend's still-fixed 5
+// questions -- if all 5 get answered first, the interview ends the normal
+// way; if time runs out first, it ends early via endInterviewSession()
+// (marks the session "completed" without needing every question answered)
+// and heads straight to feedback with whatever was captured so far.
+//
+// The "thinking" state before a question appears (Feature 7) and
+// progressive live subtitles while the AI is speaking (Feature 10) are
+// separate, later passes.
 function Interview() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [session, setSession] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -38,6 +60,15 @@ function Interview() {
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState("");
   const [submitError, setSubmitError] = useState("");
+
+  // Feature 5 -- Interview Timer. durationMinutes comes from the setup
+  // screen via router state (see InterviewSetup.jsx -> PreInterviewPrep.jsx);
+  // falls back to the setup screen's own default if that state is missing
+  // (e.g. a page refresh dropped it).
+  const durationMinutes = location.state?.durationMinutes || DEFAULT_DURATION_MINUTES;
+  const [secondsLeft, setSecondsLeft] = useState(() => durationMinutes * 60);
+  const [timeUp, setTimeUp] = useState(false);
+  const endingRef = useRef(false);
 
   // Feature 9 -- AI Voice Output.
   const [voiceSupported] = useState(isSpeechSupported);
@@ -86,6 +117,48 @@ function Interview() {
       cancelled = true;
     };
   }, [sessionId, navigate]);
+
+  // Feature 5 -- Interview Timer. One ticking clock for the whole session,
+  // started once the session/questions have loaded; stopped once the
+  // interview is over (either normally, via handleSubmit below, or because
+  // time ran out, via handleTimeUp) so it never ticks past zero or after
+  // navigating away.
+  useEffect(() => {
+    if (loading || loadError || endingRef.current) return undefined;
+    const timer = window.setInterval(() => {
+      setSecondsLeft((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [loading, loadError]);
+
+  const handleTimeUp = async () => {
+    if (endingRef.current) return;
+    endingRef.current = true;
+    setTimeUp(true);
+
+    // Stop anything voice-related immediately -- there's no point the AI
+    // still talking or the mic still listening once time's up.
+    cancelSpeech();
+    recognitionRef.current?.stop();
+    setListening(false);
+
+    try {
+      await endInterviewSession(sessionId);
+    } catch {
+      // Best-effort -- head to feedback regardless. Worst case the backend
+      // still has the session as "in_progress" and feedback generation
+      // fails there too, but that's no worse than not trying.
+    }
+    navigate(`/feedback/${sessionId}`);
+  };
+
+  // Fires exactly once, the moment the clock hits zero.
+  useEffect(() => {
+    if (secondsLeft === 0 && !timeUp && !endingRef.current) {
+      handleTimeUp();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [secondsLeft]);
 
   const answeredQuestions = questions.filter((q) => q.answer_text);
   const currentQuestion = questions.find((q) => !q.answer_text);
@@ -205,6 +278,7 @@ function Interview() {
       });
 
       if (data.status === "completed") {
+        endingRef.current = true;
         navigate(`/feedback/${sessionId}`);
       }
     } catch (err) {
@@ -243,6 +317,8 @@ function Interview() {
         difficulty={session?.difficulty}
         questionNumber={questionNumber}
         totalQuestions={TOTAL_QUESTIONS}
+        timeLabel={formatTime(secondsLeft)}
+        isTimeCritical={secondsLeft <= 60}
       />
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -291,7 +367,13 @@ function Interview() {
           )}
         </div>
 
-        {currentQuestion ? (
+        {timeUp ? (
+          <div className="card mt-6 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
+            <p className="mt-4 text-lg font-semibold text-slate-900">Time&apos;s up!</p>
+            <p className="mt-1 text-sm text-slate-500">Wrapping up your interview and preparing your feedback...</p>
+          </div>
+        ) : currentQuestion ? (
           <form onSubmit={handleSubmit} className="card mt-6">
             <div className="flex items-center justify-between gap-3">
               <label htmlFor="answer" className="field-label !mb-0">

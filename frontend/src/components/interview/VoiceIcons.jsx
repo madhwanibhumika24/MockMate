@@ -1,6 +1,6 @@
-// Small inline icon set for the interview room's voice controls. Plain
-// stroke-based glyphs -- no emoji, no illustrations -- matching the app's
-// existing icon style (see Header.jsx's menu icon).
+// Small inline icon set for the interview room's voice and timer controls.
+// Plain stroke-based glyphs -- no emoji, no illustrations -- matching the
+// app's existing icon style (see Header.jsx's menu icon).
 function baseProps(className) {
   return {
     viewBox: "0 0 24 24",
@@ -60,6 +60,15 @@ export function StopIcon({ className }) {
   return (
     <svg {...baseProps(className)} fill="currentColor">
       <rect x="6" y="6" width="12" height="12" rx="2" />
+    </svg>
+  );
+}
+
+export function ClockIcon({ className }) {
+  return (
+    <svg {...baseProps(className)} fill="none">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7.5V12l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

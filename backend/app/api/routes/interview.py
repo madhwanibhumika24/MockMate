@@ -152,6 +152,27 @@ def get_session(
     return _get_owned_session(session_id, current_user, db)
 
 
+@router.post("/sessions/{session_id}/end", response_model=InterviewSessionResponse)
+def end_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Ends a session early -- e.g. when the interview timer runs out --
+    without requiring all MAX_QUESTIONS_PER_SESSION questions to be
+    answered first. Idempotent: calling it again on an already-completed
+    session is a no-op that just returns the current row."""
+    session = _get_owned_session(session_id, current_user, db)
+
+    if session.status != "completed":
+        session.status = "completed"
+        session.completed_at = datetime.utcnow()
+        db.commit()
+        db.refresh(session)
+
+    return session
+
+
 @router.get("/sessions/{session_id}/questions", response_model=List[QuestionResponse])
 def list_questions(
     session_id: int,

@@ -39,6 +39,11 @@ export const getSessionQuestions = (sessionId) =>
 export const submitAnswer = (sessionId, payload) =>
   apiClient.post(`/interview/sessions/${sessionId}/answer`, payload);
 
+// Ends a session early (e.g. the interview timer running out) without
+// requiring all questions to be answered first -- idempotent, safe to call
+// more than once. Returns the session with status "completed".
+export const endInterviewSession = (sessionId) => apiClient.post(`/interview/sessions/${sessionId}/end`);
+
 // Call once a session's status is "completed" -- idempotent, safe to call again
 export const generateFeedback = (sessionId) =>
   apiClient.post(`/feedback/${sessionId}/generate`);
