@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { createInterviewSession } from "../../services/api.js";
-import Button from "../common/Button.jsx";
 
 // Phase 2 -- Feature 2: exact calming copy from the spec, shown one at a
 // time. Keep this short, professional and calm -- not childish.
@@ -28,10 +27,10 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 // setup screen via router state.
 //
 // A single 15-second countdown drives both the circular timer and the
-// calming-message sequence, so the two always stay in sync -- no separate
-// timers to drift apart. When the countdown reaches zero the interview
-// starts automatically; the "Begin Interview" button lets the student
-// start sooner if they're ready, without waiting.
+// calming-message sequence, so the two always stay in sync. There's no
+// manual "begin" control -- the interview starts on its own the moment the
+// ring runs out. The only control on this screen is a retry link, and only
+// if starting the session actually fails.
 function PreInterviewPrep() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -78,14 +77,16 @@ function PreInterviewPrep() {
       });
       navigate(`/interview/${data.id}`, { state: { durationMinutes: config.duration } });
     } catch (err) {
+      // Let the student retry -- there's no manual button on this screen,
+      // so a failure here can't be a dead end.
       startedRef.current = false;
-      setError(err.response?.data?.detail || "Couldn't start the interview. Please try again.");
+      setError(err.response?.data?.detail || "Couldn't start the interview.");
       setSubmitting(false);
     }
   };
 
-  // Once the ring runs out, begin automatically -- same call the button
-  // makes, guarded so it only ever fires once.
+  // Once the ring runs out, begin automatically -- guarded so it only ever
+  // fires once.
   useEffect(() => {
     if (config && secondsLeft === 0) {
       handleBegin();
@@ -102,7 +103,7 @@ function PreInterviewPrep() {
   const ringOffset = RING_CIRCUMFERENCE * (1 - secondsLeft / COUNTDOWN_SECONDS);
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 py-14 text-center sm:px-6">
+    <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-14 text-center sm:px-6">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Before you begin</p>
       <p className="mt-4 text-sm font-medium text-slate-500">Your interview begins in</p>
 
@@ -135,11 +136,16 @@ function PreInterviewPrep() {
         {MESSAGES[messageIndex]}
       </p>
 
-      {error && <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {submitting && !error && <p className="mt-6 text-sm text-slate-500">Starting your interview...</p>}
 
-      <Button type="button" loading={submitting} onClick={handleBegin} className="mt-10 w-full max-w-xs">
-        {submitting ? "Starting interview..." : "Begin Interview"}
-      </Button>
+      {error && (
+        <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}{" "}
+          <button type="button" onClick={handleBegin} className="font-semibold underline underline-offset-2">
+            Try again
+          </button>
+        </div>
+      )}
     </div>
   );
 }
