@@ -7,7 +7,7 @@ import InterviewRoomHeader from "../components/interview/InterviewRoomHeader.jsx
 import { getInterviewSession, getSessionQuestions, submitAnswer } from "../services/api.js";
 import { isRecognitionSupported, startRecognition } from "../services/speechToText.js";
 import { cancelSpeech, isSpeechSupported, pauseSpeech, resumeSpeech, speak } from "../services/textToSpeech.js";
-import { MicIcon, PauseIcon, PlayIcon, ReplayIcon } from "../components/interview/VoiceIcons.jsx";
+import { MicIcon, PauseIcon, PlayIcon, ReplayIcon, StopIcon } from "../components/interview/VoiceIcons.jsx";
 
 const TOTAL_QUESTIONS = 5; // mirrors MAX_QUESTIONS_PER_SESSION on the backend
 
@@ -136,6 +136,11 @@ function Interview() {
   }, []);
 
   const handleStartListening = () => {
+    // Stop the AI from speaking first -- otherwise the mic can pick up the
+    // question being read aloud through the speakers and transcribe that
+    // instead of the student's actual answer.
+    cancelSpeech();
+    setSpeechStatus("idle");
     setMicError("");
     setInterimTranscript("");
     setListening(true);
@@ -296,18 +301,39 @@ function Interview() {
                 <button
                   type="button"
                   onClick={listening ? handleStopListening : handleStartListening}
-                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  disabled={!listening && speechStatus === "speaking"}
+                  title={
                     listening
-                      ? "border-red-200 bg-red-50 text-red-700"
-                      : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      ? "Stop recording"
+                      : speechStatus === "speaking"
+                        ? "Wait for the question to finish playing"
+                        : "Start speaking"
+                  }
+                  className={`relative inline-flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-md transition ${
+                    listening
+                      ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                      : speechStatus === "speaking"
+                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        : "border-green-300/50 bg-green-400/15 text-green-700 shadow-green-900/5 hover:bg-green-400/25"
                   }`}
                 >
-                  {listening ? (
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
-                  ) : (
-                    <MicIcon className="h-3.5 w-3.5" />
+                  {!listening && speechStatus !== "speaking" && (
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-full bg-gradient-to-b from-white/50 to-transparent" />
                   )}
-                  {listening ? "Listening..." : "Start Speaking"}
+                  <span className="relative z-10 inline-flex items-center gap-2">
+                    {listening ? (
+                      <>
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                        </span>
+                        <StopIcon className="h-3 w-3" />
+                      </>
+                    ) : (
+                      <MicIcon className="h-3.5 w-3.5" />
+                    )}
+                    {listening ? "Stop Recording" : speechStatus === "speaking" ? "Wait..." : "Start Speaking"}
+                  </span>
                 </button>
               )}
             </div>
