@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../store/AuthContext.jsx";
 import Logo from "./Logo.jsx";
@@ -15,15 +15,8 @@ const AUTH_ROUTES = ["/login", "/signup", "/reset-password"];
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const isAuthPage = AUTH_ROUTES.includes(pathname);
-
-  const handleLogout = async () => {
-    setMobileOpen(false);
-    await logout();
-    navigate("/");
-  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/90 backdrop-blur">
@@ -49,21 +42,12 @@ function Header() {
 
             <div className="hidden items-center gap-3 md:flex">
               {isAuthenticated ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="text-sm font-semibold text-slate-300 transition hover:text-white"
-                  >
-                    Log out
-                  </button>
-                  <Link
-                    to="/dashboard"
-                    className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:bg-brand-500"
-                  >
-                    Go to Dashboard
-                  </Link>
-                </>
+                <Link
+                  to="/dashboard"
+                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:bg-brand-500"
+                >
+                  Go to Dashboard
+                </Link>
               ) : (
                 <>
                   <Link
@@ -129,22 +113,13 @@ function Header() {
           </nav>
           <div className="mt-3 flex flex-col gap-2 border-t border-slate-800 pt-3">
             {isAuthenticated ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-lg bg-brand-600 px-2 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-500"
-                >
-                  Go to Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-lg px-2 py-2.5 text-center text-sm font-semibold text-slate-200 hover:bg-slate-800"
-                >
-                  Log out
-                </button>
-              </>
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg bg-brand-600 px-2 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-500"
+              >
+                Go to Dashboard
+              </Link>
             ) : (
               <>
                 <Link
