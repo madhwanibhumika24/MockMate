@@ -5,20 +5,27 @@ import Button from "../components/common/Button.jsx";
 import ChatBubble from "../components/interview/ChatBubble.jsx";
 import InterviewRoomHeader from "../components/interview/InterviewRoomHeader.jsx";
 import { getInterviewSession, getSessionQuestions, submitAnswer } from "../services/api.js";
+import { isRecognitionSupported, startRecognition } from "../services/speechToText.js";
 import { cancelSpeech, isSpeechSupported, pauseSpeech, resumeSpeech, speak } from "../services/textToSpeech.js";
 
 const TOTAL_QUESTIONS = 5; // mirrors MAX_QUESTIONS_PER_SESSION on the backend
 
-// Phase 2 -- Feature 4 (room shell) + Feature 9 (AI Voice Output).
-// Data-fetching/submit logic is unchanged from Feature 4 -- this adds the
-// AI reading each new question aloud via the browser's built-in speech
-// synthesis, with Mute / Pause / Replay controls. The text is always shown
-// regardless of voice state, and voice support is feature-detected so the
-// interview stays fully usable via text alone if it's unavailable.
+// Phase 2 -- Feature 4 (room shell) + Feature 9 (AI voice output) +
+// Feature 11/12/13 (student voice input, live transcript, text fallback).
+// Data-fetching/submit logic is unchanged from Feature 4.
+//
+// Voice input: tapping the mic starts the browser's built-in speech
+// recognition; interim (not-yet-final) words show in a separate, visually
+// distinct line above the answer box so it's never mistaken for the actual
+// submitted answer; each finalized chunk is appended into the real answer
+// text area, which the student can still edit, add to by typing, or use
+// on its own -- voice is never required to finish the interview. If the
+// browser doesn't support it, or mic permission is denied, the mic button
+// is hidden/disabled and a small message explains it -- text still works.
 //
 // The live timer (Feature 5), the "thinking" state before a question
-// appears (Feature 7), progressive live subtitles while speaking
-// (Feature 10), and voice *input* (Feature 11) are separate, later passes.
+// appears (Feature 7), and progressive live subtitles while the AI is
+// speaking (Feature 10) are separate, later passes.
 function Interview() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -33,9 +40,15 @@ function Interview() {
 
   // Feature 9 -- AI Voice Output.
   const [voiceSupported] = useState(isSpeechSupported);
-  const [muted, setMuted] = useState(false);
   const [speechStatus, setSpeechStatus] = useState("idle"); // idle | speaking | paused
   const spokenQuestionIdRef = useRef(null);
+
+  // Feature 11/12 -- Student Voice Input + Live Transcript.
+  const [voiceInputSupported] = useState(isRecognitionSupported);
+  const [listening, setListening] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState("");
+  const [micError, setMicError] = useState("");
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,7 +95,7 @@ function Interview() {
   // the answer box, which re-renders this component but isn't a new
   // question).
   useEffect(() => {
-    if (!voiceSupported || muted || !currentQuestion) return;
+    if (!voiceSupported || !currentQuestion) return;
     if (spokenQuestionIdRef.current === currentQuestion.id) return;
     spokenQuestionIdRef.current = currentQuestion.id;
     speak(currentQuestion.question_text, {
@@ -90,23 +103,12 @@ function Interview() {
       onEnd: () => setSpeechStatus("idle"),
       onError: () => setSpeechStatus("idle"),
     });
-  }, [currentQuestion, muted, voiceSupported]);
+  }, [currentQuestion, voiceSupported]);
 
   // Stop any speech in progress if the student navigates away mid-question.
   useEffect(() => {
     return () => cancelSpeech();
   }, []);
-
-  const handleToggleMute = () => {
-    setMuted((prev) => {
-      const next = !prev;
-      if (next) {
-        cancelSpeech();
-        setSpeechStatus("idle");
-      }
-      return next;
-    });
-  };
 
   const handlePauseResume = () => {
     if (speechStatus === "speaking") {
@@ -125,6 +127,48 @@ function Interview() {
       onEnd: () => setSpeechStatus("idle"),
       onError: () => setSpeechStatus("idle"),
     });
+  };
+
+  // Stop any in-progress recognition if the student navigates away.
+  useEffect(() => {
+    return () => recognitionRef.current?.stop();
+  }, []);
+
+  const handleStartListening = () => {
+    setMicError("");
+    setInterimTranscript("");
+    setListening(true);
+    recognitionRef.current = startRecognition({
+      onInterimResult: (text) => setInterimTranscript(text),
+      onFinalResult: (text) => {
+        const chunk = text.trim();
+        if (!chunk) return;
+        setAnswerText((prev) => (prev.trim() ? `${prev.trim()} ${chunk}` : chunk));
+        setInterimTranscript("");
+      },
+      onEnd: () => {
+        setListening(false);
+        setInterimTranscript("");
+      },
+      onError: (errorType) => {
+        setListening(false);
+        setInterimTranscript("");
+        if (errorType === "not-allowed" || errorType === "service-not-allowed") {
+          setMicError("Microphone access was blocked. You can still type your answer below.");
+        } else if (errorType === "unsupported") {
+          setMicError("Voice input isn't supported in this browser. You can still type your answer below.");
+        } else if (errorType === "no-speech") {
+          setMicError("Didn't catch that -- try again, or type your answer instead.");
+        } else {
+          setMicError("Voice input stopped unexpectedly. You can still type your answer below.");
+        }
+      },
+    });
+  };
+
+  const handleStopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
   };
 
   const handleSubmit = async (event) => {
@@ -210,32 +254,21 @@ function Interview() {
                 <div className="mt-2 flex flex-wrap items-center gap-4 pl-1 text-xs">
                   <button
                     type="button"
-                    onClick={handleToggleMute}
+                    onClick={handlePauseResume}
+                    disabled={speechStatus === "idle"}
+                    className="font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    {speechStatus === "paused" ? "Play" : "Pause"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReplay}
                     className="font-semibold text-slate-500 transition hover:text-slate-800"
                   >
-                    {muted ? "Unmute" : "Mute"}
+                    Replay
                   </button>
-                  {!muted && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handlePauseResume}
-                        disabled={speechStatus === "idle"}
-                        className="font-semibold text-slate-500 transition hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300"
-                      >
-                        {speechStatus === "paused" ? "Resume" : "Pause"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleReplay}
-                        className="font-semibold text-slate-500 transition hover:text-slate-800"
-                      >
-                        Replay
-                      </button>
-                      {speechStatus === "speaking" && <span className="italic text-slate-400">Speaking...</span>}
-                      {speechStatus === "paused" && <span className="italic text-slate-400">Paused</span>}
-                    </>
-                  )}
+                  {speechStatus === "speaking" && <span className="italic text-slate-400">Speaking...</span>}
+                  {speechStatus === "paused" && <span className="italic text-slate-400">Paused</span>}
                 </div>
               )}
             </div>
@@ -244,17 +277,42 @@ function Interview() {
 
         {currentQuestion ? (
           <form onSubmit={handleSubmit} className="card mt-6">
-            <label htmlFor="answer" className="field-label">
-              Your answer
-            </label>
+            <div className="flex items-center justify-between gap-3">
+              <label htmlFor="answer" className="field-label !mb-0">
+                Your answer
+              </label>
+              {voiceInputSupported && (
+                <button
+                  type="button"
+                  onClick={listening ? handleStopListening : handleStartListening}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    listening
+                      ? "border-red-200 bg-red-50 text-red-700"
+                      : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  {listening && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />}
+                  {listening ? "Listening..." : "Start Speaking"}
+                </button>
+              )}
+            </div>
+
+            {listening && (
+              <p className="mt-2 min-h-[1.5rem] rounded-lg bg-slate-50 px-3 py-2 text-sm italic text-slate-500">
+                {interimTranscript || "Listening for your answer..."}
+              </p>
+            )}
+
             <textarea
               id="answer"
               value={answerText}
               onChange={(event) => setAnswerText(event.target.value)}
               rows={6}
-              placeholder="Type your answer here..."
+              placeholder="Type your answer here, or use the mic above."
               className="input-field mt-2 resize-none"
             />
+
+            {micError && <p className="mt-2 text-xs text-slate-500">{micError}</p>}
 
             {submitError && (
               <div className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</div>
