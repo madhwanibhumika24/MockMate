@@ -26,6 +26,7 @@ STAGE_SETS = {
         "deep_dive_component",
         "scaling_tradeoffs",
     ],
+    "company": ["introduction", "technical_deep_dive", "problem_solving", "closing_fit", "closing_wrapup"],
     "mixed": ["introduction", "resume_walkthrough", "fundamentals", "behavioral_scenario", "closing_wrapup"],
 }
 
@@ -133,6 +134,11 @@ STAGE_GUIDANCE = {
         "Ask a closing question that blends technical curiosity with soft-"
         "skill reflection -- e.g. what they'd want to learn next in this role."
     ),
+    "technical_deep_dive": (
+        "Ask a role-specific technical question in the style of a "
+        "standardized technical round many companies run for this kind of "
+        "role -- practical and realistic, not academic trivia."
+    ),
 }
 
 # Stages where a chosen topic (e.g. "Python", "Java") should sharpen the
@@ -168,6 +174,13 @@ INTERVIEW_TYPE_GUIDANCE = {
         "This is a system design interview. Pose a realistic design scenario "
         "appropriate to the role and difficulty level, and ask the candidate "
         "to reason through it -- this is not a coding/trivia round."
+    ),
+    "company": (
+        "This is a company-style interview modeled on the general format "
+        "many companies use for this kind of role -- a mix of technical "
+        "depth and culture/communication fit. These are AI-generated "
+        "practice questions, not real questions from any specific company's "
+        "actual past interview -- never imply otherwise."
     ),
     "mixed": (
         "This is a mixed-format interview blending technical fundamentals, "

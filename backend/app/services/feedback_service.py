@@ -33,6 +33,11 @@ FEEDBACK_TYPE_GUIDANCE = {
         "reasoning, and scalability awareness. Do not penalize minor "
         "syntax/coding gaps -- this was a design round, not a coding one."
     ),
+    "company": (
+        "Evaluate the way a hiring panel at a typical company would for "
+        "this kind of role -- both technical competence and communication/"
+        "culture fit, weighted evenly."
+    ),
     "mixed": (
         "Evaluate across both technical competence and communication/"
         "behavioral quality, weighting each appropriately for the questions "

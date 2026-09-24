@@ -110,5 +110,34 @@ export const INTERVIEW_TYPES = [
   { value: "behavioral", label: "Behavioral" },
   { value: "project", label: "Project Deep-Dive" },
   { value: "system_design", label: "System Design" },
+  { value: "company", label: "Company-style" },
   { value: "mixed", label: "Mixed" },
 ];
+
+// Fixed role list for the interview setup screen (Phase 2) -- deliberately
+// short and flat, unlike the course->role picker used elsewhere.
+export const SETUP_ROLES = [
+  "Software Engineer",
+  "Backend Developer",
+  "Frontend Developer",
+  "Full Stack Developer",
+  "Data Analyst",
+  "Data Scientist",
+  "System Engineer",
+  "AI/ML Engineer",
+];
+
+// Interview setup screen difficulty labels -> the backend's difficulty enum
+// (easy | medium | hard). Kept as a separate map instead of renaming the
+// backend enum, so existing sessions/feedback aren't affected.
+export const SETUP_DIFFICULTIES = [
+  { value: "easy", label: "Beginner" },
+  { value: "medium", label: "Intermediate" },
+  { value: "hard", label: "Advanced" },
+];
+
+// Interview duration options (minutes) for the setup screen. Not yet
+// enforced by the backend (which still asks a fixed number of questions) --
+// carried through to the interview page for the timer feature to use once
+// it's built.
+export const SETUP_DURATIONS = [10, 20, 30, 45];

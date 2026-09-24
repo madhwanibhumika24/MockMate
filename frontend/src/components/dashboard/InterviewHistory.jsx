@@ -32,6 +32,7 @@ const INTERVIEW_TYPE_LABELS = {
   behavioral: "Behavioral",
   project: "Project Deep-Dive",
   system_design: "System Design",
+  company: "Company-style",
   mixed: "Mixed",
 };
 

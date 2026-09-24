@@ -61,7 +61,7 @@ SESSION_MODES = ("role", "resume", "topic", "job_description")
 # Category of interview -- shifts the whole question flow (see
 # app/services/interview_service.py's STAGE_SETS), independent of mode/
 # difficulty/topic. "technical" preserves the original fixed 5-stage flow.
-INTERVIEW_TYPES = ("technical", "hr", "behavioral", "project", "system_design", "mixed")
+INTERVIEW_TYPES = ("technical", "hr", "behavioral", "project", "system_design", "company", "mixed")
 
 # Allowed values for User.auth_provider.
 AUTH_PROVIDERS = ("local", "google", "github")
