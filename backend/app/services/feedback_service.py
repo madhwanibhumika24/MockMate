@@ -8,9 +8,43 @@ from google import genai
 
 from app.core.config import get_settings
 
+# What to weigh when scoring each interview type -- keeps feedback honest and
+# type-appropriate (e.g. an HR round shouldn't be marked down for lacking
+# coding depth, since it was never meant to test that).
+FEEDBACK_TYPE_GUIDANCE = {
+    "technical": "Evaluate technical accuracy, depth of reasoning, and problem-solving approach.",
+    "hr": (
+        "Evaluate communication clarity, self-awareness, motivation, and "
+        "cultural fit. Do not penalize a lack of technical/coding depth -- "
+        "this was an HR round, not a technical one."
+    ),
+    "behavioral": (
+        "Evaluate use of the STAR method (Situation, Task, Action, Result), "
+        "specificity of the examples given, and quality of reflection. Do "
+        "not penalize a lack of technical depth."
+    ),
+    "project": (
+        "Evaluate depth of ownership, clarity of technical decision-making, "
+        "and the candidate's ability to discuss trade-offs and impact for "
+        "their project."
+    ),
+    "system_design": (
+        "Evaluate structured thinking, requirement-gathering, trade-off "
+        "reasoning, and scalability awareness. Do not penalize minor "
+        "syntax/coding gaps -- this was a design round, not a coding one."
+    ),
+    "mixed": (
+        "Evaluate across both technical competence and communication/"
+        "behavioral quality, weighting each appropriately for the questions "
+        "actually asked."
+    ),
+}
+
 FEEDBACK_SYSTEM_PROMPT = """\
 You are an expert interview coach reviewing a completed mock interview for \
 the role of {role}. You will be given the full list of questions and answers.
+
+{feedback_focus}
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with \
 exactly these keys:
@@ -35,10 +69,18 @@ def _get_client() -> genai.Client:
     return genai.Client(api_key=settings.google_api_key)
 
 
-def generate_feedback(role: str, job_description: Optional[str], qa_pairs: List[Tuple[str, str]]) -> dict:
+def generate_feedback(
+    role: str,
+    job_description: Optional[str],
+    qa_pairs: List[Tuple[str, str]],
+    interview_type: str = "technical",
+) -> dict:
     """Generates structured feedback for a completed interview session.
 
-    `qa_pairs` is the full [(question, answer), ...] transcript. Returns a
+    `qa_pairs` is the full [(question, answer), ...] transcript. `interview_type`
+    ("technical" | "hr" | "behavioral" | "project" | "system_design" | "mixed")
+    steers what the scoring criteria emphasize, via FEEDBACK_TYPE_GUIDANCE, so
+    e.g. an HR round isn't marked down for lacking coding depth. Returns a
     dict shaped like app.models.schemas.FeedbackResponse's fields
     (summary/strengths/improvements/score), ready to save into the
     `feedback` table.
@@ -53,8 +95,11 @@ def generate_feedback(role: str, job_description: Optional[str], qa_pairs: List[
     client = _get_client()
     settings = get_settings()
 
+    interview_type = interview_type if interview_type in FEEDBACK_TYPE_GUIDANCE else "technical"
+
     system_prompt = FEEDBACK_SYSTEM_PROMPT.format(
         role=role,
+        feedback_focus=FEEDBACK_TYPE_GUIDANCE[interview_type],
         job_description=job_description or "(not provided)",
     )
     transcript = "\n\n".join(f"Q: {q}\nA: {a}" for q, a in qa_pairs)

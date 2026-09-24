@@ -26,6 +26,15 @@ const DIFFICULTY_STYLES = {
   hard: "bg-red-50 text-red-600",
 };
 
+const INTERVIEW_TYPE_LABELS = {
+  technical: "Technical",
+  hr: "HR",
+  behavioral: "Behavioral",
+  project: "Project Deep-Dive",
+  system_design: "System Design",
+  mixed: "Mixed",
+};
+
 function HistoryRow({ session }) {
   const statusStyle = STATUS_STYLES[session.status] || STATUS_STYLES.created;
   const statusLabel = STATUS_LABELS[session.status] || session.status;
@@ -34,8 +43,18 @@ function HistoryRow({ session }) {
   return (
     <div className="flex flex-col gap-2 border-b border-slate-100 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium text-slate-900">{session.role}</p>
+          {session.interview_type && session.interview_type !== "technical" && (
+            <span className="inline-flex flex-none items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+              {INTERVIEW_TYPE_LABELS[session.interview_type] || session.interview_type}
+            </span>
+          )}
+          {session.topic && (
+            <span className="inline-flex flex-none items-center rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-600">
+              {session.topic}
+            </span>
+          )}
           {session.difficulty && (
             <span className={`inline-flex flex-none items-center rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${difficultyStyle}`}>
               {session.difficulty}

@@ -54,6 +54,15 @@ SESSION_STATUSES = ("created", "in_progress", "completed")
 # Allowed values for InterviewSession.difficulty.
 DIFFICULTY_LEVELS = ("easy", "medium", "hard")
 
+# Allowed values for InterviewSession.mode -- which Start Interview tab the
+# candidate used.
+SESSION_MODES = ("role", "resume", "topic", "job_description")
+
+# Category of interview -- shifts the whole question flow (see
+# app/services/interview_service.py's STAGE_SETS), independent of mode/
+# difficulty/topic. "technical" preserves the original fixed 5-stage flow.
+INTERVIEW_TYPES = ("technical", "hr", "behavioral", "project", "system_design", "mixed")
+
 # Allowed values for User.auth_provider.
 AUTH_PROVIDERS = ("local", "google", "github")
 
@@ -152,6 +161,15 @@ class UserProfile(Base):
     resume_text = Column(Text, nullable=True)
     resume_filename = Column(String(255), nullable=True)
 
+    # Structured extraction of resume_text above (education, skills,
+    # projects, experience, certifications), produced by
+    # app.services.resume_analyzer_service.analyze_resume the last time the
+    # resume was uploaded/updated -- lets resume-based interview questions
+    # be grounded in what's actually in the resume, and lets the profile UI
+    # show the candidate what was found. Null if no resume, or if extraction
+    # failed (resume upload itself never blocks on this).
+    resume_analysis = Column(JSON, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
@@ -176,10 +194,31 @@ class InterviewSession(Base):
     resume_text = Column(Text, nullable=True)
     resume_filename = Column(String, nullable=True)
 
+    # Structured extraction of resume_text above for this session --
+    # reused from UserProfile.resume_analysis when this session's resume_text
+    # matches the saved profile resume exactly, otherwise freshly analyzed at
+    # session-creation time. See resume_analysis column on UserProfile.
+    resume_analysis = Column(JSON, nullable=True)
+
     # Drives both question difficulty and the fixed stage structure (intro ->
     # resume walkthrough -> fundamentals -> OOP -> problem solving) -- see
     # app/services/interview_service.py.
     difficulty = Column(String(20), default="medium", nullable=False)
+
+    # Optional language/technology to focus fundamentals/OOP/problem-solving
+    # questions on (e.g. "Python", "Java"). Null means "let the LLM infer
+    # from role/resume/job description", same as before this field existed.
+    topic = Column(String(100), nullable=True)
+
+    # Which Start Interview tab was used ("role" | "resume" | "topic" |
+    # "job_description") -- shifts overall question emphasis, see
+    # app/services/interview_service.py's MODE_GUIDANCE.
+    mode = Column(String(20), default="role", nullable=False)
+
+    # Category of interview (Technical/HR/Behavioral/Project/System Design/
+    # Mixed) -- picks which fixed 5-stage question flow this session follows.
+    # See app/services/interview_service.py's STAGE_SETS.
+    interview_type = Column(String(20), default="technical", nullable=False)
 
     status = Column(String, default="created", nullable=False)
 

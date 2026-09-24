@@ -3,13 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 
 import ProfileMenu from "../components/dashboard/ProfileMenu.jsx";
 import InterviewHistory from "../components/dashboard/InterviewHistory.jsx";
+import ResumeManager from "../components/dashboard/ResumeManager.jsx";
 import StatsSummary from "../components/dashboard/StatsSummary.jsx";
+import ReadinessInsights from "../components/dashboard/ReadinessInsights.jsx";
+import AskAI from "../components/dashboard/AskAI.jsx";
 import Logo from "../components/common/Logo.jsx";
 import { getMyProfile, listInterviewSessions } from "../services/api.js";
 import { useAuth } from "../store/AuthContext.jsx";
 
 const TABS = [
   { id: "interview", label: "Practice Interview" },
+  { id: "ask-ai", label: "Ask AI" },
   { id: "assessments", label: "Assessments" },
 ];
 
@@ -105,13 +109,7 @@ function Dashboard() {
           </Link>
 
           <div className="flex items-center gap-3">
-            <ProfileMenu
-              user={user}
-              profile={profile}
-              sessions={sessions}
-              onLogout={handleLogout}
-              onProfileUpdate={setProfile}
-            />
+            <ProfileMenu user={user} profile={profile} sessions={sessions} onLogout={handleLogout} />
             <button
               type="button"
               onClick={handleLogout}
@@ -127,16 +125,20 @@ function Dashboard() {
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">Welcome back, {firstName}</h1>
         <p className="mt-1 text-slate-600">Ready to sharpen your interview skills?</p>
 
+        <ReadinessInsights sessions={sessions} />
+
         <StatsSummary sessions={sessions} />
 
+        <ResumeManager profile={profile} onProfileUpdate={setProfile} />
+
         <div className="mt-8 border-b border-slate-200">
-          <nav className="flex gap-6">
+          <nav className="flex gap-4 overflow-x-auto sm:gap-6 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`border-b-2 pb-3 text-sm font-semibold transition ${
+                className={`flex-none whitespace-nowrap border-b-2 pb-3 text-sm font-semibold transition ${
                   activeTab === tab.id
                     ? "border-brand-600 text-brand-700"
                     : "border-transparent text-slate-500 hover:text-slate-700"
@@ -152,6 +154,7 @@ function Dashboard() {
           {activeTab === "interview" && (
             <InterviewTab sessions={sessions} sessionsLoading={sessionsLoading} />
           )}
+          {activeTab === "ask-ai" && <AskAI />}
           {activeTab === "assessments" && <AssessmentsTab />}
         </div>
       </main>

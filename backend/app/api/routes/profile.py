@@ -5,6 +5,7 @@ from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.orm import EMPLOYMENT_STATUSES, User, UserProfile
 from app.models.schemas import ProfileResponse, ProfileUpdate, ResumeUpdate
+from app.services.resume_analyzer_service import analyze_resume
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -79,6 +80,9 @@ def update_my_resume(
 
     profile.resume_text = payload.resume_text
     profile.resume_filename = payload.resume_filename
+    # Best-effort: analyze_resume() never raises, just returns None on
+    # failure, so a resume upload is never blocked by extraction issues.
+    profile.resume_analysis = analyze_resume(payload.resume_text)
 
     db.commit()
     db.refresh(profile)
@@ -94,6 +98,7 @@ def delete_my_resume(current_user: User = Depends(get_current_user), db: Session
 
     profile.resume_text = None
     profile.resume_filename = None
+    profile.resume_analysis = None
     db.commit()
     db.refresh(profile)
     return profile

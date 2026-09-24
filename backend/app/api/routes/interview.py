@@ -6,7 +6,15 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
 from app.db.session import get_db
-from app.models.orm import DIFFICULTY_LEVELS, InterviewQuestion, InterviewSession, User
+from app.models.orm import (
+    DIFFICULTY_LEVELS,
+    INTERVIEW_TYPES,
+    SESSION_MODES,
+    InterviewQuestion,
+    InterviewSession,
+    User,
+    UserProfile,
+)
 from app.models.schemas import (
     AnswerSubmission,
     InterviewSessionCreate,
@@ -15,6 +23,7 @@ from app.models.schemas import (
     QuestionResponse,
 )
 from app.services.interview_service import generate_question
+from app.services.resume_analyzer_service import analyze_resume
 from datetime import datetime
 
 router = APIRouter(prefix="/interview", tags=["interview"])
@@ -47,6 +56,22 @@ def create_session(
     """Creates a new interview session (for the logged-in user) and generates
     its first question."""
     difficulty = payload.difficulty if payload.difficulty in DIFFICULTY_LEVELS else "medium"
+    topic = payload.topic.strip() if payload.topic and payload.topic.strip() else None
+    mode = payload.mode if payload.mode in SESSION_MODES else "role"
+    interview_type = payload.interview_type if payload.interview_type in INTERVIEW_TYPES else "technical"
+
+    # Reuse the profile's cached resume analysis when this session's resume
+    # text is exactly the saved profile resume (the common case -- no
+    # override upload) to avoid a redundant Gemini call; otherwise analyze
+    # this session's resume text fresh. Best-effort: analyze_resume() never
+    # raises, just returns None on failure.
+    resume_analysis = None
+    if payload.resume_text:
+        profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).one_or_none()
+        if profile and profile.resume_text == payload.resume_text and profile.resume_analysis:
+            resume_analysis = profile.resume_analysis
+        else:
+            resume_analysis = analyze_resume(payload.resume_text)
 
     session = InterviewSession(
         user_id=current_user.id,
@@ -55,6 +80,10 @@ def create_session(
         resume_text=payload.resume_text,
         resume_filename=payload.resume_filename,
         difficulty=difficulty,
+        topic=topic,
+        mode=mode,
+        interview_type=interview_type,
+        resume_analysis=resume_analysis,
         status="created",
     )
     db.add(session)
@@ -65,6 +94,10 @@ def create_session(
         job_description=session.job_description,
         resume_text=session.resume_text,
         difficulty=session.difficulty,
+        topic=session.topic,
+        mode=session.mode,
+        interview_type=session.interview_type,
+        resume_analysis=session.resume_analysis,
     )
     first_question = InterviewQuestion(
         session_id=session.id,
@@ -97,6 +130,9 @@ def list_sessions(
             id=s.id,
             role=s.role,
             difficulty=s.difficulty,
+            topic=s.topic,
+            mode=s.mode,
+            interview_type=s.interview_type,
             status=s.status,
             created_at=s.created_at,
             completed_at=s.completed_at,
@@ -164,6 +200,10 @@ def submit_answer(
             resume_text=session.resume_text,
             previous_qa=_qa_history(session),
             difficulty=session.difficulty,
+            topic=session.topic,
+            mode=session.mode,
+            interview_type=session.interview_type,
+            resume_analysis=session.resume_analysis,
         )
         next_question_row = InterviewQuestion(
             session_id=session.id,

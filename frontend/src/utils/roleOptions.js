@@ -82,3 +82,33 @@ export const COURSES = [
     roles: ["Product Manager", "Associate Product Manager", "Technical Product Manager"],
   },
 ];
+
+// Optional per-session focus for the fundamentals/OOP/problem-solving
+// questions -- e.g. picking "Python" makes those questions specifically
+// about Python instead of the LLM guessing from role/resume/JD. Deliberately
+// one flat list regardless of course/role for now (not curated per role).
+export const TOPICS = [
+  "Python",
+  "Java",
+  "JavaScript / TypeScript",
+  "C++",
+  "C#",
+  "Go",
+  "Ruby",
+  "PHP",
+  "SQL",
+  "Swift",
+  "Kotlin",
+];
+
+// Interview category -- shifts the whole 5-question flow the session
+// follows (see backend STAGE_SETS), independent of role/difficulty/topic.
+// "technical" is the default and matches the original fixed flow.
+export const INTERVIEW_TYPES = [
+  { value: "technical", label: "Technical" },
+  { value: "hr", label: "HR" },
+  { value: "behavioral", label: "Behavioral" },
+  { value: "project", label: "Project Deep-Dive" },
+  { value: "system_design", label: "System Design" },
+  { value: "mixed", label: "Mixed" },
+];

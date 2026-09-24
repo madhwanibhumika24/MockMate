@@ -16,9 +16,10 @@ export const uploadResume = (file) => {
   return apiClient.post("/resume/upload", formData);
 };
 
-// payload: { role, job_description?, resume_text?, resume_filename?, difficulty? }
-// ("easy" | "medium" | "hard", defaults to "medium" server-side if omitted)
-// Returns the created session, e.g. { id, role, job_description, difficulty, status, created_at, completed_at }
+// payload: { role, job_description?, resume_text?, resume_filename?, difficulty?, topic? }
+// difficulty: "easy" | "medium" | "hard" (defaults to "medium" server-side if omitted)
+// topic: e.g. "Python" -- optional, null/omitted lets the LLM infer one instead
+// Returns the created session, e.g. { id, role, job_description, difficulty, topic, status, created_at, completed_at }
 export const createInterviewSession = (payload) =>
   apiClient.post("/interview/sessions", payload);
 
@@ -83,6 +84,12 @@ export const skipOnboarding = () => apiClient.post("/profile/skip");
 export const updateMyResume = (payload) => apiClient.put("/profile/resume", payload);
 
 export const deleteMyResume = () => apiClient.delete("/profile/resume");
+
+// payload: { prompt } -- a free-text description of what to practice, e.g.
+// "5 hard Python OOP questions". Returns { interpreted: { topic, role,
+// difficulty, question_type, count, summary }, questions: [string, ...] }.
+// Stateless: no session is created, no answers/feedback are collected.
+export const generateAskAIQuestions = (prompt) => apiClient.post("/ask-ai/generate", { prompt });
 
 export const googleLoginUrl = `${API_BASE_URL}/auth/google/login`;
 export const githubLoginUrl = `${API_BASE_URL}/auth/github/login`;

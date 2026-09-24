@@ -17,6 +17,9 @@ class InterviewSessionCreate(BaseModel):
     resume_text: Optional[str] = None
     resume_filename: Optional[str] = None
     difficulty: str = "medium"  # "easy" | "medium" | "hard"
+    topic: Optional[str] = None  # e.g. "Python", "Java" -- None lets the LLM infer
+    mode: str = "role"  # "role" | "resume" | "topic" | "job_description"
+    interview_type: str = "technical"  # "technical" | "hr" | "behavioral" | "project" | "system_design" | "mixed"
 
 
 class InterviewSessionResponse(BaseModel):
@@ -26,6 +29,9 @@ class InterviewSessionResponse(BaseModel):
     role: str
     job_description: Optional[str] = None
     difficulty: str
+    topic: Optional[str] = None
+    mode: str
+    interview_type: str
     status: str
     created_at: datetime
     completed_at: Optional[datetime] = None
@@ -39,6 +45,9 @@ class InterviewSessionSummary(BaseModel):
     id: int
     role: str
     difficulty: str
+    topic: Optional[str] = None
+    mode: str
+    interview_type: str
     status: str
     created_at: datetime
     completed_at: Optional[datetime] = None
@@ -78,6 +87,27 @@ class FeedbackResponse(BaseModel):
     improvements: list[str] = []
     score: Optional[float] = None
     created_at: Optional[datetime] = None
+
+
+# ---------- Ask AI (free-text practice generator) ----------
+
+
+class AskAIRequest(BaseModel):
+    prompt: str
+
+
+class AskAIInterpreted(BaseModel):
+    topic: Optional[str] = None
+    role: Optional[str] = None
+    difficulty: str = "medium"
+    question_type: str = "mixed"
+    count: int = 5
+    summary: str = ""
+
+
+class AskAIResponse(BaseModel):
+    interpreted: AskAIInterpreted
+    questions: list[str] = []
 
 
 # ---------- Reference documents (RAG corpus) ----------
@@ -167,6 +197,7 @@ class ProfileResponse(BaseModel):
     target_role: Optional[str] = None
     resume_text: Optional[str] = None
     resume_filename: Optional[str] = None
+    resume_analysis: Optional[dict] = None
 
 
 class ResumeUpdate(BaseModel):
