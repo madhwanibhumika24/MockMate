@@ -19,8 +19,8 @@ function OptionPills({ options, value, onChange, columns = 3 }) {
             onClick={() => onChange(option.value)}
             className={`rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
               isActive
-                ? "border-brand-600 bg-brand-50 text-brand-700"
-                : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                ? "border-brand-600 bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
+                : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:bg-slate-50"
             }`}
           >
             {option.label}
@@ -114,24 +114,24 @@ function InterviewSetup() {
           />
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Configuration summary</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Configuration summary</p>
           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3">
             <div>
-              <dt className="text-xs text-slate-500">Interview Type</dt>
-              <dd className="text-sm font-semibold text-slate-900">{typeLabel}</dd>
+              <dt className="text-xs text-slate-500 dark:text-slate-400">Interview Type</dt>
+              <dd className="text-sm font-semibold text-slate-900 dark:text-slate-100">{typeLabel}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Role</dt>
-              <dd className="text-sm font-semibold text-slate-900">{role}</dd>
+              <dt className="text-xs text-slate-500 dark:text-slate-400">Role</dt>
+              <dd className="text-sm font-semibold text-slate-900 dark:text-slate-100">{role}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Difficulty</dt>
-              <dd className="text-sm font-semibold text-slate-900">{difficultyLabel}</dd>
+              <dt className="text-xs text-slate-500 dark:text-slate-400">Difficulty</dt>
+              <dd className="text-sm font-semibold text-slate-900 dark:text-slate-100">{difficultyLabel}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-500">Duration</dt>
-              <dd className="text-sm font-semibold text-slate-900">{duration} Minutes</dd>
+              <dt className="text-xs text-slate-500 dark:text-slate-400">Duration</dt>
+              <dd className="text-sm font-semibold text-slate-900 dark:text-slate-100">{duration} Minutes</dd>
             </div>
           </dl>
         </div>

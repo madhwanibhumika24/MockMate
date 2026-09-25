@@ -139,7 +139,7 @@ function ResetPassword() {
         step !== "done" && (
           <>
             Remembered it?{" "}
-            <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+            <Link to="/login" className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
               Log in
             </Link>
           </>
@@ -163,7 +163,7 @@ function ResetPassword() {
             />
           </div>
 
-          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
           <Button type="submit" loading={submitting} className="w-full">
             Send reset code
@@ -173,29 +173,29 @@ function ResetPassword() {
 
       {step === "code" && (
         <form onSubmit={handleCodeSubmit} className="space-y-5">
-          <p className="text-center text-sm text-slate-600">
-            We sent a 6-digit code to <span className="font-semibold text-slate-900">{email}</span>.
+          <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+            We sent a 6-digit code to <span className="font-semibold text-slate-900 dark:text-slate-100">{email}</span>.
           </p>
 
           <OtpCodeInput value={code} onChange={setCode} disabled={codeExpired || submitting} />
 
-          <p className={`text-center text-xs font-medium ${codeExpired ? "text-red-600" : "text-slate-500"}`}>
+          <p className={`text-center text-xs font-medium ${codeExpired ? "text-red-600 dark:text-red-400" : "text-slate-500 dark:text-slate-400"}`}>
             {codeExpired ? "Code expired" : `Expires in ${formatTime(secondsLeft)}`}
           </p>
 
-          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
           <Button type="submit" loading={submitting} className="w-full" disabled={codeExpired}>
             Verify code
           </Button>
 
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-slate-600 dark:text-slate-400">
             Didn&rsquo;t get it?{" "}
             <button
               type="button"
               onClick={handleResendCode}
               disabled={submitting}
-              className="font-semibold text-brand-600 hover:text-brand-700 disabled:text-slate-400"
+              className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 disabled:text-slate-400"
             >
               Resend code
             </button>
@@ -234,7 +234,7 @@ function ResetPassword() {
             />
           </div>
 
-          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
           <Button type="submit" loading={submitting} className="w-full">
             Reset password
@@ -243,9 +243,9 @@ function ResetPassword() {
       )}
 
       {step === "done" && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-emerald-600">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-5 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-800/40">
+            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-emerald-600 dark:text-emerald-400">
               <path
                 d="M5 13l4 4L19 7"
                 stroke="currentColor"
@@ -255,7 +255,7 @@ function ResetPassword() {
               />
             </svg>
           </div>
-          <p className="text-sm text-slate-700">
+          <p className="text-sm text-slate-700 dark:text-slate-300">
             Your password has been reset. You can now log in with your new password.
           </p>
           <button

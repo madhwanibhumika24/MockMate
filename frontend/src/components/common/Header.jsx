@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../store/AuthContext.jsx";
 import Logo from "./Logo.jsx";
+import ThemeToggle from "./ThemeToggle.jsx";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
@@ -25,6 +26,8 @@ function Header() {
           <Logo />
         </Link>
 
+        {isAuthPage && <ThemeToggle variant="on-dark" />}
+
         {!isAuthPage && (
           <>
             {/* Desktop nav */}
@@ -41,6 +44,7 @@ function Header() {
             </nav>
 
             <div className="hidden items-center gap-3 md:flex">
+              <ThemeToggle variant="on-dark" />
               {isAuthenticated ? (
                 <Link
                   to="/dashboard"
@@ -66,32 +70,35 @@ function Header() {
               )}
             </div>
 
-            {/* Mobile menu toggle */}
-            <button
-              type="button"
-              onClick={() => setMobileOpen((open) => !open)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 hover:bg-slate-800 md:hidden"
-              aria-label="Toggle menu"
-              aria-expanded={mobileOpen}
-            >
-              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
-                {mobileOpen ? (
-                  <path
-                    d="M6 6l12 12M18 6L6 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                ) : (
-                  <path
-                    d="M4 7h16M4 12h16M4 17h16"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                )}
-              </svg>
-            </button>
+            {/* Mobile: theme toggle + menu button */}
+            <div className="flex items-center gap-1 md:hidden">
+              <ThemeToggle variant="on-dark" />
+              <button
+                type="button"
+                onClick={() => setMobileOpen((open) => !open)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 hover:bg-slate-800"
+                aria-label="Toggle menu"
+                aria-expanded={mobileOpen}
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6">
+                  {mobileOpen ? (
+                    <path
+                      d="M6 6l12 12M18 6L6 18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  ) : (
+                    <path
+                      d="M4 7h16M4 12h16M4 17h16"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  )}
+                </svg>
+              </button>
+            </div>
           </>
         )}
       </div>

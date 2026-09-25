@@ -53,7 +53,7 @@ function Login() {
       footer={
         <>
           New to MockMate?{" "}
-          <Link to="/signup" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/signup" className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
             Create an account
           </Link>
         </>
@@ -79,7 +79,7 @@ function Login() {
             <label htmlFor="password" className="field-label">
               Password
             </label>
-            <Link to="/reset-password" className="text-xs font-semibold text-brand-600 hover:text-brand-700">
+            <Link to="/reset-password" className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
               Forgot password?
             </Link>
           </div>
@@ -94,7 +94,7 @@ function Login() {
           />
         </div>
 
-        {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
         <Button type="submit" loading={submitting} className="w-full">
           Log in

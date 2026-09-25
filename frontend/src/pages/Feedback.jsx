@@ -11,36 +11,36 @@ function getScoreTone(score) {
   if (score == null) {
     return {
       label: "Pending",
-      text: "text-slate-700",
-      badge: "bg-slate-100 text-slate-600 ring-slate-200",
+      text: "text-slate-700 dark:text-slate-300",
+      badge: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 ring-slate-200 dark:ring-slate-700",
       stroke: "stroke-slate-300",
-      glow: "bg-slate-200",
+      glow: "bg-slate-200 dark:bg-slate-700",
     };
   }
   if (score >= 75) {
     return {
       label: "Strong performance",
-      text: "text-emerald-700",
-      badge: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+      text: "text-emerald-700 dark:text-emerald-300",
+      badge: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-emerald-100 dark:ring-emerald-800/60",
       stroke: "stroke-emerald-500",
-      glow: "bg-emerald-200",
+      glow: "bg-emerald-200 dark:bg-emerald-800/50",
     };
   }
   if (score >= 50) {
     return {
       label: "Room to grow",
-      text: "text-amber-700",
-      badge: "bg-amber-50 text-amber-700 ring-amber-100",
+      text: "text-amber-700 dark:text-amber-300",
+      badge: "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-amber-100 dark:ring-amber-800/60",
       stroke: "stroke-amber-500",
-      glow: "bg-amber-200",
+      glow: "bg-amber-200 dark:bg-amber-800/50",
     };
   }
   return {
     label: "Needs work",
-    text: "text-red-700",
-    badge: "bg-red-50 text-red-700 ring-red-100",
+    text: "text-red-700 dark:text-red-300",
+    badge: "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-red-100 dark:ring-red-100/10",
     stroke: "stroke-red-500",
-    glow: "bg-red-200",
+    glow: "bg-red-200 dark:bg-red-800/50",
   };
 }
 
@@ -137,7 +137,7 @@ function ScoreRing({ score, tone }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-3xl font-bold ${tone.text}`}>{Math.round(score)}</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">out of 100</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">out of 100</span>
       </div>
     </div>
   );
@@ -220,8 +220,8 @@ function Feedback() {
   if (loading) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-        <p className="mt-4 text-sm text-slate-500">Analyzing your answers...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 dark:border-brand-800/60 border-t-brand-600" />
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Analyzing your answers...</p>
       </div>
     );
   }
@@ -229,9 +229,9 @@ function Feedback() {
   if (error) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <h2 className="text-lg font-semibold text-slate-900">Something went wrong</h2>
-        <p className="mt-2 text-sm text-slate-600">{error}</p>
-        <Link to="/start" className="mt-6 inline-block text-sm font-semibold text-brand-600 hover:text-brand-700">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Something went wrong</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{error}</p>
+        <Link to="/start" className="mt-6 inline-block text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
           Start a new interview
         </Link>
       </div>
@@ -245,23 +245,23 @@ function Feedback() {
       {/* Print-only masthead -- the app header/nav is already hidden on this
           route, so this is the only branding a saved report carries. */}
       <div className="mb-6 hidden text-center print:block">
-        <p className="text-sm font-bold tracking-wide text-slate-900">MockMate</p>
-        <p className="text-xs text-slate-500">Interview feedback report &middot; {new Date().toLocaleDateString()}</p>
+        <p className="text-sm font-bold tracking-wide text-slate-900 dark:text-slate-100">MockMate</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Interview feedback report &middot; {new Date().toLocaleDateString()}</p>
       </div>
 
       <div className="animate-fade-up text-center">
-        <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
+        <span className="inline-flex items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 ring-1 ring-inset ring-brand-100 dark:ring-brand-800/60">
           {role}
         </span>
-        <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">Your interview feedback</h1>
+        <h1 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100 sm:text-3xl">Your interview feedback</h1>
       </div>
 
       {/* Hero -- the score ring, tone, and summary, wrapped in a card with a
           soft tone-colored glow behind it for a bit of personality without
           getting in the way of reading it. */}
-      <div className="animate-fade-up-delay-1 relative mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-card sm:p-8 print:border-0 print:p-0 print:shadow-none">
+      <div className="animate-fade-up-delay-1 relative mt-8 overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-card sm:p-8 print:border-0 print:p-0 print:shadow-none">
         <div className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full ${tone.glow} opacity-30 blur-3xl print:hidden`} />
-        <div className={`pointer-events-none absolute -bottom-20 -left-12 h-40 w-40 rounded-full bg-brand-200 opacity-20 blur-3xl print:hidden`} />
+        <div className={`pointer-events-none absolute -bottom-20 -left-12 h-40 w-40 rounded-full bg-brand-200 dark:bg-brand-700/50 opacity-20 blur-3xl print:hidden`} />
 
         <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
           {feedback.score != null && <ScoreRing score={feedback.score} tone={tone} />}
@@ -269,25 +269,25 @@ function Feedback() {
             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${tone.badge}`}>
               {tone.label}
             </span>
-            <p className="mt-3 text-slate-700">{feedback.summary}</p>
+            <p className="mt-3 text-slate-700 dark:text-slate-300">{feedback.summary}</p>
           </div>
         </div>
 
         {session && (
-          <div className="relative mt-6 flex flex-wrap items-center justify-center gap-2 border-t border-slate-100 pt-5 text-xs font-medium text-slate-500 sm:justify-start">
+          <div className="relative mt-6 flex flex-wrap items-center justify-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-5 text-xs font-medium text-slate-500 dark:text-slate-400 sm:justify-start">
             {session.interview_type && (
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 capitalize">
+              <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 capitalize">
                 {session.interview_type} interview
               </span>
             )}
             {session.difficulty && (
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 capitalize">
+              <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 capitalize">
                 {session.difficulty} difficulty
               </span>
             )}
-            {session.topic && <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1">{session.topic}</span>}
+            {session.topic && <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1">{session.topic}</span>}
             {formatSessionDate(session.completed_at || session.created_at) && (
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1">
+              <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1">
                 {formatSessionDate(session.completed_at || session.created_at)}
               </span>
             )}
@@ -297,40 +297,40 @@ function Feedback() {
 
       {/* Strengths / improvements -- their own scannable, tinted cards. */}
       <div className="animate-fade-up-delay-2 mt-6 grid gap-4 sm:grid-cols-2 print:grid-cols-1">
-        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 print:border-slate-200 print:bg-white">
-          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700">
+        <div className="rounded-2xl border border-emerald-100 dark:border-emerald-800/60 bg-emerald-50/60 dark:bg-emerald-900/20 p-5 print:border-slate-200 print:bg-white">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
             <CheckCircleIcon className="h-4 w-4" />
             Strengths
           </p>
           {feedback.strengths.length > 0 ? (
             <ul className="mt-3 space-y-2.5">
               {feedback.strengths.map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm text-slate-700">
-                  <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-emerald-500" />
+                <li key={index} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                  <CheckCircleIcon className="mt-0.5 h-4 w-4 flex-none text-emerald-500 dark:text-emerald-400" />
                   {item}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-slate-400">No specific strengths noted.</p>
+            <p className="mt-3 text-sm text-slate-400 dark:text-slate-500">No specific strengths noted.</p>
           )}
         </div>
-        <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-5 print:border-slate-200 print:bg-white">
-          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-700">
+        <div className="rounded-2xl border border-amber-100 dark:border-amber-800/60 bg-amber-50/60 dark:bg-amber-900/20 p-5 print:border-slate-200 print:bg-white">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">
             <WarningIcon className="h-4 w-4" />
             Areas to improve
           </p>
           {feedback.improvements.length > 0 ? (
             <ul className="mt-3 space-y-2.5">
               {feedback.improvements.map((item, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm text-slate-700">
-                  <WarningIcon className="mt-0.5 h-4 w-4 flex-none text-amber-500" />
+                <li key={index} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                  <WarningIcon className="mt-0.5 h-4 w-4 flex-none text-amber-500 dark:text-amber-400" />
                   {item}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-sm text-slate-400">No specific improvements noted.</p>
+            <p className="mt-3 text-sm text-slate-400 dark:text-slate-500">No specific improvements noted.</p>
           )}
         </div>
       </div>
@@ -339,8 +339,8 @@ function Feedback() {
           instead of trailing into empty space. */}
       <div className="card mt-6 flex flex-col items-center gap-4 bg-gradient-to-br from-brand-50 to-white text-center print:hidden sm:flex-row sm:justify-between sm:text-left">
         <div>
-          <h3 className="text-base font-semibold text-slate-900">Ready to put this into practice?</h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Ready to put this into practice?</h3>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             {feedback.improvements.length > 0
               ? `Run it back and focus on: ${feedback.improvements[0]}`
               : "Keep the momentum going with another mock interview."}
@@ -364,21 +364,21 @@ function Feedback() {
         <button
           type="button"
           onClick={handleDownloadReport}
-          className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm transition hover:bg-slate-50"
         >
           <DownloadIcon className="h-4 w-4" />
           Download report
         </button>
         <Link
           to="/start"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 hover:text-slate-900"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 transition hover:bg-slate-200 hover:text-slate-900"
         >
           <ShuffleIcon className="h-4 w-4" />
           Practice a different role
         </Link>
         <Link
           to="/dashboard"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-200 hover:text-slate-900"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-100 dark:bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 transition hover:bg-slate-200 hover:text-slate-900"
         >
           <DashboardIcon className="h-4 w-4" />
           Back to dashboard

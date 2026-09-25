@@ -6,12 +6,12 @@ function AnalysisChips({ label, items }) {
   if (!items || items.length === 0) return null;
   return (
     <div className="mt-2">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
       <div className="mt-1 flex flex-wrap gap-1.5">
         {items.map((item, index) => (
           <span
             key={`${label}-${index}`}
-            className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+            className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-400"
           >
             {item}
           </span>
@@ -38,8 +38,8 @@ function ResumeAnalysisSummary({ analysis }) {
   if (!hasAnything) return null;
 
   return (
-    <details className="mt-3 border-t border-slate-100 pt-3">
-      <summary className="cursor-pointer list-none text-sm font-semibold text-brand-600 marker:content-none hover:text-brand-700">
+    <details className="mt-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+      <summary className="cursor-pointer list-none text-sm font-semibold text-brand-600 dark:text-brand-400 marker:content-none hover:text-brand-700">
         View what we found in your resume
       </summary>
       <div className="mt-3">
@@ -48,7 +48,7 @@ function ResumeAnalysisSummary({ analysis }) {
         <AnalysisChips label="Projects" items={projectNames} />
         <AnalysisChips label="Experience" items={experienceRoles} />
         <AnalysisChips label="Certifications" items={analysis.certifications} />
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
           This is used to keep resume-based interview questions grounded in what's actually on your resume.
         </p>
       </div>
@@ -102,14 +102,14 @@ function ResumeManager({ profile, onProfileUpdate }) {
     <div className="card mt-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-slate-900">Resume</h3>
-          <p className="mt-1 text-sm text-slate-600">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Resume</h3>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
             Upload once and it's used to personalize every mock interview -- no need to attach it again each time.
           </p>
           {profile?.resume_filename && (
-            <p className="mt-2 text-sm font-medium text-emerald-600">&#10003; {profile.resume_filename}</p>
+            <p className="mt-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">&#10003; {profile.resume_filename}</p>
           )}
-          {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+          {error && <p className="mt-2 text-xs text-red-500 dark:text-red-400">{error}</p>}
         </div>
 
         <div className="flex flex-none gap-2">
@@ -117,7 +117,7 @@ function ResumeManager({ profile, onProfileUpdate }) {
             type="button"
             disabled={busy}
             onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 disabled:opacity-50"
           >
             {busy ? "Uploading..." : profile?.resume_filename ? "Replace" : "Upload resume"}
           </button>
@@ -126,7 +126,7 @@ function ResumeManager({ profile, onProfileUpdate }) {
               type="button"
               disabled={busy}
               onClick={handleRemove}
-              className="inline-flex items-center justify-center rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+              className="inline-flex items-center justify-center rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 transition hover:bg-red-50 disabled:opacity-50"
             >
               Remove
             </button>

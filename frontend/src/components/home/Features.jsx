@@ -95,12 +95,12 @@ const FEATURE_CARDS = [
 
 function Features() {
   return (
-    <div id="features" className="scroll-mt-20 border-t border-slate-200 bg-white">
+    <div id="features" className="scroll-mt-20 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-sm font-semibold uppercase tracking-wide text-brand-600">Features</span>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900">Everything you need to walk in ready</h2>
-          <p className="mt-3 text-slate-600">
+          <span className="text-sm font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-400">Features</span>
+          <h2 className="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">Everything you need to walk in ready</h2>
+          <p className="mt-3 text-slate-600 dark:text-slate-400">
             Every feature exists for one reason: to help you feel prepared, not just quizzed.
           </p>
         </div>
@@ -114,9 +114,9 @@ function Features() {
               <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm shadow-brand-600/30">
                 {feature.icon}
               </span>
-              <h3 className="mt-4 font-semibold text-slate-900">{feature.title}</h3>
-              <p className="mt-1 text-sm font-medium text-brand-600">{feature.tagline}</p>
-              <p className="mt-2 text-sm text-slate-600">{feature.description}</p>
+              <h3 className="mt-4 font-semibold text-slate-900 dark:text-slate-100">{feature.title}</h3>
+              <p className="mt-1 text-sm font-medium text-brand-600 dark:text-brand-400">{feature.tagline}</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{feature.description}</p>
             </div>
           ))}
         </div>

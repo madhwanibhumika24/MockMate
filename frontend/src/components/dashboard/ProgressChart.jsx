@@ -84,25 +84,25 @@ function ProgressChart({ sessions }) {
     <div className="card mt-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">Progress over time</h3>
-          <p className="text-xs text-slate-500">Feedback score across your completed interviews</p>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Progress over time</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Feedback score across your completed interviews</p>
         </div>
         <div className="flex items-start gap-4">
           <div className="text-right">
-            <p className="text-2xl font-bold text-slate-900">{Math.round(latest.score)}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{Math.round(latest.score)}</p>
             {delta !== 0 ? (
-              <p className={`text-xs font-semibold ${delta > 0 ? "text-emerald-600" : "text-amber-600"}`}>
+              <p className={`text-xs font-semibold ${delta > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
                 {delta > 0 ? "+" : ""}
                 {delta} since your first scored interview
               </p>
             ) : (
-              <p className="text-xs text-slate-400">Latest score</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Latest score</p>
             )}
           </div>
           <button
             type="button"
             onClick={() => setShowTable((current) => !current)}
-            className="flex-none text-xs font-semibold text-brand-600 hover:text-brand-700"
+            className="flex-none text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700"
           >
             {showTable ? "View as chart" : "View as table"}
           </button>
@@ -110,9 +110,9 @@ function ProgressChart({ sessions }) {
       </div>
 
       {showTable ? (
-        <div className="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-100">
+        <div className="mt-4 max-h-64 overflow-y-auto rounded-lg border border-slate-100 dark:border-slate-800">
           <table className="w-full text-left text-sm">
-            <thead className="sticky top-0 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               <tr>
                 <th scope="col" className="px-3 py-2">
                   Date
@@ -125,12 +125,12 @@ function ProgressChart({ sessions }) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {points.map((p) => (
                 <tr key={p.id}>
-                  <td className="px-3 py-2 text-slate-600">{formatFullDate(p.date)}</td>
-                  <td className="px-3 py-2 text-slate-900">{p.role}</td>
-                  <td className="px-3 py-2 text-right font-semibold text-slate-900">{Math.round(p.score)}/100</td>
+                  <td className="px-3 py-2 text-slate-600 dark:text-slate-400">{formatFullDate(p.date)}</td>
+                  <td className="px-3 py-2 text-slate-900 dark:text-slate-100">{p.role}</td>
+                  <td className="px-3 py-2 text-right font-semibold text-slate-900 dark:text-slate-100">{Math.round(p.score)}/100</td>
                 </tr>
               ))}
             </tbody>

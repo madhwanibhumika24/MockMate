@@ -15,21 +15,21 @@ function OptionCard({ selected, title, description, onClick }) {
       onClick={onClick}
       className={`flex-1 rounded-xl border-2 p-5 text-left transition ${
         selected
-          ? "border-brand-500 bg-brand-50 shadow-sm"
-          : "border-slate-200 bg-white hover:border-slate-300"
+          ? "border-brand-500 bg-brand-50 dark:bg-brand-900/40 shadow-sm"
+          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300"
       }`}
     >
       <div className="flex items-center gap-3">
         <span
           className={`flex h-5 w-5 flex-none items-center justify-center rounded-full border-2 ${
-            selected ? "border-brand-600 bg-brand-600" : "border-slate-300"
+            selected ? "border-brand-600 bg-brand-600" : "border-slate-300 dark:border-slate-600"
           }`}
         >
-          {selected && <span className="h-2 w-2 rounded-full bg-white" />}
+          {selected && <span className="h-2 w-2 rounded-full bg-white dark:bg-slate-800" />}
         </span>
-        <span className="font-semibold text-slate-900">{title}</span>
+        <span className="font-semibold text-slate-900 dark:text-slate-100">{title}</span>
       </div>
-      <p className="mt-1.5 pl-8 text-sm text-slate-600">{description}</p>
+      <p className="mt-1.5 pl-8 text-sm text-slate-600 dark:text-slate-400">{description}</p>
     </button>
   );
 }
@@ -125,14 +125,14 @@ function Onboarding() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-slate-50 px-4 py-12 sm:px-6">
+    <div className="flex min-h-[calc(100vh-73px)] items-center justify-center bg-slate-50 dark:bg-slate-900 px-4 py-12 sm:px-6">
       <div className="w-full max-w-2xl">
         <div className="mb-8 text-center">
           <Logo dark={false} className="justify-center" />
-          <h1 className="mt-5 text-2xl font-bold text-slate-900 sm:text-3xl">
+          <h1 className="mt-5 text-2xl font-bold text-slate-900 dark:text-slate-100 sm:text-3xl">
             {isEditing ? "Update your profile" : "Tell us a bit about yourself"}
           </h1>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             {isEditing
               ? "Keep your info up to date so practice questions stay relevant."
               : "This helps us tailor your practice questions. Totally optional -- you can skip and add it later from your profile."}
@@ -255,7 +255,7 @@ function Onboarding() {
           {employmentStatus && (
             <div>
               <label htmlFor="targetRole" className="field-label">
-                What role are you practicing for? <span className="font-normal text-slate-400">(optional)</span>
+                What role are you practicing for? <span className="font-normal text-slate-400 dark:text-slate-500">(optional)</span>
               </label>
               <input
                 id="targetRole"
@@ -268,7 +268,7 @@ function Onboarding() {
             </div>
           )}
 
-          {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+          {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
           <div className="flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-between">
             {isEditing ? (
@@ -278,7 +278,7 @@ function Onboarding() {
                 type="button"
                 onClick={handleSkip}
                 disabled={skipping || submitting}
-                className="text-sm font-semibold text-slate-500 hover:text-slate-700 disabled:text-slate-300"
+                className="text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 disabled:text-slate-300"
               >
                 Skip for now
               </button>

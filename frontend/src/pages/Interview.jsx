@@ -291,8 +291,8 @@ function Interview() {
   if (loading) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-        <p className="mt-4 text-sm text-slate-500">Loading your interview...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 dark:border-brand-800/60 border-t-brand-600" />
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading your interview...</p>
       </div>
     );
   }
@@ -300,9 +300,9 @@ function Interview() {
   if (loadError) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <h2 className="text-lg font-semibold text-slate-900">Something went wrong</h2>
-        <p className="mt-2 text-sm text-slate-600">{loadError}</p>
-        <Link to="/start" className="mt-6 inline-block text-sm font-semibold text-brand-600 hover:text-brand-700">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Something went wrong</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{loadError}</p>
+        <Link to="/start" className="mt-6 inline-block text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
           Start a new interview
         </Link>
       </div>
@@ -310,7 +310,7 @@ function Interview() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-800">
       <InterviewRoomHeader
         role={session?.role}
         interviewType={session?.interview_type}
@@ -334,13 +334,13 @@ function Interview() {
               <ChatBubble from="ai">{currentQuestion.question_text}</ChatBubble>
               {voiceSupported && (
                 <div className="ml-9 mt-2 flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+                  <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1 shadow-sm">
                     <button
                       type="button"
                       onClick={handlePauseResume}
                       disabled={speechStatus === "idle"}
                       title={speechStatus === "paused" ? "Play" : "Pause"}
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
                     >
                       {speechStatus === "paused" ? (
                         <PlayIcon className="h-3.5 w-3.5" />
@@ -352,15 +352,15 @@ function Interview() {
                       type="button"
                       onClick={handleReplay}
                       title="Replay"
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:text-slate-800"
                     >
                       <ReplayIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                   {speechStatus === "speaking" && (
-                    <span className="text-xs italic text-slate-400">Speaking...</span>
+                    <span className="text-xs italic text-slate-400 dark:text-slate-500">Speaking...</span>
                   )}
-                  {speechStatus === "paused" && <span className="text-xs italic text-slate-400">Paused</span>}
+                  {speechStatus === "paused" && <span className="text-xs italic text-slate-400 dark:text-slate-500">Paused</span>}
                 </div>
               )}
             </div>
@@ -369,9 +369,9 @@ function Interview() {
 
         {timeUp ? (
           <div className="card mt-6 text-center">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-            <p className="mt-4 text-lg font-semibold text-slate-900">Time&apos;s up!</p>
-            <p className="mt-1 text-sm text-slate-500">Wrapping up your interview and preparing your feedback...</p>
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-brand-200 dark:border-brand-800/60 border-t-brand-600" />
+            <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">Time&apos;s up!</p>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Wrapping up your interview and preparing your feedback...</p>
           </div>
         ) : currentQuestion ? (
           <form onSubmit={handleSubmit} className="card mt-6">
@@ -393,9 +393,9 @@ function Interview() {
                   }
                   className={`relative inline-flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-md transition ${
                     listening
-                      ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                      ? "border-red-300 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100"
                       : speechStatus === "speaking"
-                        ? "cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400"
+                        ? "cursor-not-allowed border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
                         : "border-green-300/50 bg-green-400/15 text-green-700 shadow-green-900/5 hover:bg-green-400/25"
                   }`}
                 >
@@ -421,7 +421,7 @@ function Interview() {
             </div>
 
             {listening && (
-              <p className="mt-2 min-h-[1.5rem] rounded-lg bg-slate-50 px-3 py-2 text-sm italic text-slate-500">
+              <p className="mt-2 min-h-[1.5rem] rounded-lg bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm italic text-slate-500 dark:text-slate-400">
                 {interimTranscript || "Listening for your answer..."}
               </p>
             )}
@@ -435,10 +435,10 @@ function Interview() {
               className="input-field mt-2 resize-none"
             />
 
-            {micError && <p className="mt-2 text-xs text-slate-500">{micError}</p>}
+            {micError && <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{micError}</p>}
 
             {submitError && (
-              <div className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</div>
+              <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{submitError}</div>
             )}
 
             <div className="mt-4 flex justify-end">
@@ -448,7 +448,7 @@ function Interview() {
             </div>
           </form>
         ) : (
-          <div className="card mt-6 text-center text-slate-600">Wrapping up your interview...</div>
+          <div className="card mt-6 text-center text-slate-600 dark:text-slate-400">Wrapping up your interview...</div>
         )}
       </div>
     </div>

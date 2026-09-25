@@ -110,18 +110,18 @@ function PreInterviewPrep() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-14 text-center sm:px-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Before you begin</p>
-      <p className="mt-4 text-sm font-medium text-slate-500">Your interview begins in</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Before you begin</p>
+      <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">Your interview begins in</p>
 
       {config.jobDescriptionHint && (
-        <p className="mt-3 max-w-xs rounded-full bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
+        <p className="mt-3 max-w-xs rounded-full bg-brand-50 dark:bg-brand-900/40 px-3 py-1.5 text-xs font-medium text-brand-700 dark:text-brand-300 ring-1 ring-inset ring-brand-100 dark:ring-brand-800/60">
           {config.jobDescriptionHint}
         </p>
       )}
 
       <div className="relative mt-4 h-28 w-28">
         <svg viewBox="0 0 100 100" className="h-28 w-28 -rotate-90">
-          <circle cx="50" cy="50" r={RING_RADIUS} fill="none" strokeWidth="6" stroke="currentColor" className="text-slate-200" />
+          <circle cx="50" cy="50" r={RING_RADIUS} fill="none" strokeWidth="6" stroke="currentColor" className="text-slate-200 dark:text-slate-700" />
           <circle
             cx="50"
             cy="50"
@@ -130,28 +130,28 @@ function PreInterviewPrep() {
             strokeWidth="6"
             strokeLinecap="round"
             stroke="currentColor"
-            className="text-brand-600"
+            className="text-brand-600 dark:text-brand-400"
             strokeDasharray={RING_CIRCUMFERENCE}
             strokeDashoffset={ringOffset}
             style={{ transition: "stroke-dashoffset 1s linear" }}
           />
         </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-2xl font-semibold text-slate-900">
+        <div className="absolute inset-0 flex items-center justify-center text-2xl font-semibold text-slate-900 dark:text-slate-100">
           {secondsLeft}
         </div>
       </div>
 
       <p
         key={messageIndex}
-        className="animate-fade-up mt-8 min-h-[3.5rem] text-2xl font-semibold text-slate-900 sm:text-3xl"
+        className="animate-fade-up mt-8 min-h-[3.5rem] text-2xl font-semibold text-slate-900 dark:text-slate-100 sm:text-3xl"
       >
         {MESSAGES[messageIndex]}
       </p>
 
-      {submitting && !error && <p className="mt-6 text-sm text-slate-500">Starting your interview...</p>}
+      {submitting && !error && <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">Starting your interview...</p>}
 
       {error && (
-        <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mt-6 rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">
           {error}{" "}
           <button type="button" onClick={handleBegin} className="font-semibold underline underline-offset-2">
             Try again

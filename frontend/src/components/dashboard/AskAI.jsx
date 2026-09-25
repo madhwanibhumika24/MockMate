@@ -32,7 +32,7 @@ function InterpretedChips({ interpreted }) {
       {chips.map((chip, index) => (
         <span
           key={`${chip}-${index}`}
-          className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600"
+          className="inline-flex items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400"
         >
           {chip}
         </span>
@@ -70,8 +70,8 @@ function AskAI() {
 
   return (
     <div className="card">
-      <h3 className="text-lg font-semibold text-slate-900">Ask AI for practice questions</h3>
-      <p className="mt-1 text-sm text-slate-600">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Ask AI for practice questions</h3>
+      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
         Describe what you want to practice in your own words -- topic, difficulty, how many questions -- and
         get a tailored set instantly. This doesn't start a full mock interview or collect feedback.
       </p>
@@ -91,14 +91,14 @@ function AskAI() {
               key={example}
               type="button"
               onClick={() => setPrompt(example)}
-              className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-500 transition hover:border-brand-300 hover:text-brand-600"
+              className="rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 transition hover:border-brand-300 hover:text-brand-600"
             >
               {example}
             </button>
           ))}
         </div>
 
-        {error && <div className="mt-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {error && <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
         <Button type="submit" loading={loading} className="mt-4">
           {loading ? "Generating..." : "Generate questions"}
@@ -106,17 +106,17 @@ function AskAI() {
       </form>
 
       {result && (
-        <div className="mt-6 border-t border-slate-100 pt-5">
-          <p className="text-sm text-slate-600">{result.interpreted.summary}</p>
+        <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-5">
+          <p className="text-sm text-slate-600 dark:text-slate-400">{result.interpreted.summary}</p>
           <div className="mt-2">
             <InterpretedChips interpreted={result.interpreted} />
           </div>
 
           <ol className="mt-4 space-y-3">
             {result.questions.map((question, index) => (
-              <li key={index} className="flex gap-3 rounded-xl bg-slate-50 px-4 py-3">
-                <span className="flex-none text-sm font-semibold text-brand-600">{index + 1}.</span>
-                <span className="text-sm text-slate-800">{question}</span>
+              <li key={index} className="flex gap-3 rounded-xl bg-slate-50 dark:bg-slate-900 px-4 py-3">
+                <span className="flex-none text-sm font-semibold text-brand-600 dark:text-brand-400">{index + 1}.</span>
+                <span className="text-sm text-slate-800 dark:text-slate-200">{question}</span>
               </li>
             ))}
           </ol>

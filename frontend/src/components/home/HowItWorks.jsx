@@ -18,20 +18,20 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <div id="how-it-works" className="relative scroll-mt-20 border-t border-slate-200 bg-white">
+    <div id="how-it-works" className="relative scroll-mt-20 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <h2 className="text-center text-2xl font-bold text-slate-900">How it works</h2>
+        <h2 className="text-center text-2xl font-bold text-slate-900 dark:text-slate-100">How it works</h2>
         <div className="mt-10 grid gap-10 sm:grid-cols-3">
           {STEPS.map((item, index) => (
             <div key={item.step} className="relative text-center">
               {index < STEPS.length - 1 && (
-                <div className="absolute left-1/2 top-6 hidden h-px w-full bg-slate-200 sm:block" />
+                <div className="absolute left-1/2 top-6 hidden h-px w-full bg-slate-200 dark:bg-slate-700 sm:block" />
               )}
               <div className="relative mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">
                 {item.step}
               </div>
-              <p className="mt-4 font-semibold text-slate-900">{item.title}</p>
-              <p className="mt-1.5 text-sm text-slate-600">{item.description}</p>
+              <p className="mt-4 font-semibold text-slate-900 dark:text-slate-100">{item.title}</p>
+              <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">{item.description}</p>
             </div>
           ))}
         </div>

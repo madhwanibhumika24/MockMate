@@ -71,7 +71,7 @@ function OtpCodeInput({ length = 6, value, onChange, disabled = false, autoFocus
           disabled={disabled}
           onChange={(event) => handleChange(index, event)}
           onKeyDown={(event) => handleKeyDown(index, event)}
-          className="h-12 w-10 rounded-lg border border-slate-300 text-center text-lg font-semibold text-slate-900 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:bg-slate-100 disabled:text-slate-400 sm:h-14 sm:w-12"
+          className="h-12 w-10 rounded-lg border border-slate-300 dark:border-slate-600 text-center text-lg font-semibold text-slate-900 dark:text-slate-100 shadow-sm transition focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:bg-slate-100 disabled:text-slate-400 sm:h-14 sm:w-12"
         />
       ))}
     </div>

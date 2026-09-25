@@ -12,6 +12,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <title>MockMate -- practice interviews with AI-generated questions</title>
+    <script>
+      // Applied before React mounts so the page never flashes light-then-dark
+      // (or vice versa) on load. Mirrors the logic in ThemeContext.jsx --
+      // keep the two in sync if the storage key or fallback ever changes.
+      (function () {
+        try {
+          var stored = localStorage.getItem("mockmate-theme");
+          var isDark =
+            stored === "dark" ||
+            (stored !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", isDark);
+        } catch (err) {
+          // localStorage/matchMedia unavailable (e.g. privacy mode) -- fall
+          // back to light, same as the rest of the app's default.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

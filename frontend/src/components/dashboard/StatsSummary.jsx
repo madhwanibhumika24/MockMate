@@ -3,8 +3,8 @@ import { computeInterviewStats } from "../../utils/interviewStats.js";
 function StatCard({ label, value }) {
   return (
     <div className="card py-5 sm:py-6">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 }

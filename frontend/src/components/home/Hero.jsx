@@ -55,11 +55,11 @@ function Hero() {
   return (
     <div className="mx-auto grid max-w-5xl items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
       <div className="text-center lg:text-left">
-        <span className="animate-fade-up inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
+        <span className="animate-fade-up inline-flex items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 ring-1 ring-inset ring-brand-100 dark:ring-brand-800/60">
           Practice makes prepared
         </span>
 
-        <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
+        <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl">
           <span className="block">{line1.nodes}</span>
           <span
             className="animate-fade-up block bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent"
@@ -70,7 +70,7 @@ function Hero() {
         </h1>
 
         <p
-          className="animate-fade-up mx-auto mt-5 max-w-xl text-lg text-slate-600 lg:mx-0"
+          className="animate-fade-up mx-auto mt-5 max-w-xl text-lg text-slate-600 dark:text-slate-400 lg:mx-0"
           style={{ animationDelay: `${contentDelay}s` }}
         >
           Tell MockMate the role you're targeting and it generates tailored
@@ -101,7 +101,7 @@ function Hero() {
               />
             </svg>
           </Link>
-          <a href="/#features" className="text-sm font-semibold text-slate-600 transition hover:text-brand-600">
+          <a href="/#features" className="text-sm font-semibold text-slate-600 dark:text-slate-400 transition hover:text-brand-600">
             See what's included
           </a>
         </div>
@@ -110,10 +110,10 @@ function Hero() {
           className="animate-fade-up mx-auto mt-12 max-w-md border-l-4 border-brand-400 pl-4 text-left lg:mx-0"
           style={{ animationDelay: `${contentDelay + 0.24}s` }}
         >
-          <p className="text-base italic text-slate-600">
+          <p className="text-base italic text-slate-600 dark:text-slate-400">
             &ldquo;Success is where preparation and opportunity meet.&rdquo;
           </p>
-          <footer className="mt-1 text-sm text-slate-400">&mdash; Bobby Unser</footer>
+          <footer className="mt-1 text-sm text-slate-400 dark:text-slate-500">&mdash; Bobby Unser</footer>
         </blockquote>
       </div>
 

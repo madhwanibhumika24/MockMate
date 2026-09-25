@@ -53,7 +53,7 @@ function Signup() {
       footer={
         <>
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/login" className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700">
             Log in
           </Link>
         </>
@@ -117,7 +117,7 @@ function Signup() {
           />
         </div>
 
-        {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {error && <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
 
         <Button type="submit" loading={submitting} className="w-full">
           Create account

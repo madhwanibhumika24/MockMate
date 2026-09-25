@@ -30,7 +30,7 @@ function App() {
   const isAppShellPage = APP_SHELL_SEGMENTS.includes(pathname.split("/")[1]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       {!isAppShellPage && <Header />}
       <main className="flex-1">
         <Routes>

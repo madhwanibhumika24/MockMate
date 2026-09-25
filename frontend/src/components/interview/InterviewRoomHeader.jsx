@@ -23,13 +23,13 @@ function InterviewRoomHeader({
   const progress = totalQuestions > 0 ? (Math.min(questionNumber - 1, totalQuestions) / totalQuestions) * 100 : 0;
 
   return (
-    <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 backdrop-blur">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">
+          <span className="inline-flex items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-300 ring-1 ring-inset ring-brand-100 dark:ring-brand-800/60">
             {role}
           </span>
-          <span className="hidden text-xs font-medium text-slate-400 sm:inline">
+          <span className="hidden text-xs font-medium text-slate-400 dark:text-slate-500 sm:inline">
             {typeLabel} &middot; {difficultyLabel}
           </span>
         </div>
@@ -37,19 +37,19 @@ function InterviewRoomHeader({
           {timeLabel && (
             <span
               className={`inline-flex items-center gap-1.5 text-base font-semibold tabular-nums ${
-                isTimeCritical ? "text-red-600" : "text-red-400"
+                isTimeCritical ? "text-red-600 dark:text-red-400" : "text-red-400"
               }`}
             >
               <ClockIcon className="h-5 w-5" />
               {timeLabel}
             </span>
           )}
-          <span className="text-sm font-medium text-slate-500">
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Question {questionNumber} of {totalQuestions}
           </span>
         </div>
       </div>
-      <div className="h-1.5 w-full overflow-hidden bg-slate-100">
+      <div className="h-1.5 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
         <div className="h-full bg-brand-600 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
     </header>
