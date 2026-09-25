@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createInterviewSession } from "../../services/api.js";
 import { INTERVIEW_TYPES, SETUP_DIFFICULTIES, SETUP_DURATIONS, SETUP_ROLES } from "../../utils/roleOptions.js";
 import Button from "../common/Button.jsx";
 
@@ -53,9 +52,6 @@ function InterviewSetup() {
   const [role, setRole] = useState(SETUP_ROLES[0]);
   const [duration, setDuration] = useState(SETUP_DURATIONS[1]);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
   const typeLabel = useMemo(
     () => INTERVIEW_TYPES.find((option) => option.value === interviewType)?.label || interviewType,
     [interviewType],
@@ -65,20 +61,11 @@ function InterviewSetup() {
     [difficulty],
   );
 
-  const handleStart = async () => {
-    setError("");
-    setSubmitting(true);
-    try {
-      const { data } = await createInterviewSession({
-        role,
-        interview_type: interviewType,
-        difficulty,
-      });
-      navigate(`/interview/${data.id}`, { state: { durationMinutes: duration } });
-    } catch (err) {
-      setError(err.response?.data?.detail || "Couldn't start the interview. Please try again.");
-      setSubmitting(false);
-    }
+  // Phase 2 -- Feature 2: the session itself isn't created here anymore --
+  // the config is carried through to the Pre-Interview Preparation screen,
+  // which creates it once the student clicks "Begin Interview".
+  const handleStart = () => {
+    navigate("/interview/prepare", { state: { role, interviewType, difficulty, duration } });
   };
 
   return (
@@ -149,10 +136,8 @@ function InterviewSetup() {
           </dl>
         </div>
 
-        {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-
-        <Button type="button" loading={submitting} onClick={handleStart} className="w-full">
-          {submitting ? "Starting interview..." : "Start Interview"}
+        <Button type="button" onClick={handleStart} className="w-full">
+          Start Interview
         </Button>
       </div>
     </div>

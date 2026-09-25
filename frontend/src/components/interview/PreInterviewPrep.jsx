@@ -74,6 +74,12 @@ function PreInterviewPrep() {
         role: config.role,
         interview_type: config.interviewType,
         difficulty: config.difficulty,
+        // "Practice this again" (from the feedback page) passes a short hint
+        // built from last time's improvement areas, so the next set of
+        // questions leans into what needs more practice. Omitted entirely
+        // for the normal setup flow -- the backend already treats
+        // job_description as optional.
+        ...(config.jobDescriptionHint ? { job_description: config.jobDescriptionHint } : {}),
       });
       navigate(`/interview/${data.id}`, { state: { durationMinutes: config.duration } });
     } catch (err) {
@@ -106,6 +112,12 @@ function PreInterviewPrep() {
     <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-14 text-center sm:px-6">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Before you begin</p>
       <p className="mt-4 text-sm font-medium text-slate-500">Your interview begins in</p>
+
+      {config.jobDescriptionHint && (
+        <p className="mt-3 max-w-xs rounded-full bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 ring-1 ring-inset ring-brand-100">
+          {config.jobDescriptionHint}
+        </p>
+      )}
 
       <div className="relative mt-4 h-28 w-28">
         <svg viewBox="0 0 100 100" className="h-28 w-28 -rotate-90">

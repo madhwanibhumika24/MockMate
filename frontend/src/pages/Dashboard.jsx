@@ -5,6 +5,7 @@ import ProfileMenu from "../components/dashboard/ProfileMenu.jsx";
 import InterviewHistory from "../components/dashboard/InterviewHistory.jsx";
 import ResumeManager from "../components/dashboard/ResumeManager.jsx";
 import StatsSummary from "../components/dashboard/StatsSummary.jsx";
+import ProgressChart from "../components/dashboard/ProgressChart.jsx";
 import ReadinessInsights from "../components/dashboard/ReadinessInsights.jsx";
 import AskAI from "../components/dashboard/AskAI.jsx";
 import Logo from "../components/common/Logo.jsx";
@@ -152,6 +153,8 @@ function Dashboard() {
         <ReadinessInsights sessions={sessions} />
 
         <StatsSummary sessions={sessions} />
+
+        <ProgressChart sessions={sessions} />
 
         <ResumeManager profile={profile} onProfileUpdate={setProfile} />
 

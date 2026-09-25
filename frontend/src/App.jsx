@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Feedback from "./pages/Feedback.jsx";
 import Home from "./pages/Home.jsx";
 import Interview from "./pages/Interview.jsx";
+import InterviewPrepare from "./pages/InterviewPrepare.jsx";
 import Login from "./pages/Login.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
@@ -15,14 +16,18 @@ import StartInterview from "./pages/StartInterview.jsx";
 
 // Pages with no marketing chrome at all -- auth pages keep a stripped-down
 // header (handled inside Header.jsx) but still show the footer's nav; the
-// app shell pages below bring their own complete header instead.
+// app shell pages below bring their own header (or none) instead of the
+// marketing one. Matched by first path segment rather than exact strings so
+// dynamic routes like /interview/:sessionId and /feedback/:sessionId are
+// covered too, without having to remember to add every new protected page
+// here one at a time.
 const AUTH_ROUTES = ["/login", "/signup", "/reset-password"];
-const APP_SHELL_ROUTES = ["/dashboard", "/onboarding"];
+const APP_SHELL_SEGMENTS = ["dashboard", "onboarding", "start", "interview", "feedback"];
 
 function App() {
   const { pathname } = useLocation();
   const isAuthPage = AUTH_ROUTES.includes(pathname);
-  const isAppShellPage = APP_SHELL_ROUTES.includes(pathname);
+  const isAppShellPage = APP_SHELL_SEGMENTS.includes(pathname.split("/")[1]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -54,6 +59,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <StartInterview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview/prepare"
+            element={
+              <ProtectedRoute>
+                <InterviewPrepare />
               </ProtectedRoute>
             }
           />

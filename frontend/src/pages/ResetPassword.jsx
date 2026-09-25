@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import AuthLayout from "../components/auth/AuthLayout.jsx";
 import OtpCodeInput from "../components/auth/OtpCodeInput.jsx";
 import Button from "../components/common/Button.jsx";
+import { confirmPasswordReset, requestPasswordReset, verifyResetCode } from "../services/api.js";
 
 const CODE_LENGTH = 6;
 const CODE_TTL_SECONDS = 5 * 60;
@@ -15,6 +16,8 @@ function formatTime(totalSeconds) {
 }
 
 function ResetPassword() {
+  const navigate = useNavigate();
+
   // "email" -> "code" -> "password" -> "done"
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
@@ -25,7 +28,8 @@ function ResetPassword() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Count the code down to 0 while the code step is showing.
+  // Count the code down to 0 while the code step is showing. This is a UX
+  // timer only -- the backend enforces the real expiry independently.
   useEffect(() => {
     if (step !== "code") return undefined;
     const timer = setInterval(() => {
@@ -36,27 +40,41 @@ function ResetPassword() {
 
   const codeExpired = secondsLeft <= 0;
 
-  const handleEmailSubmit = (event) => {
+  const handleEmailSubmit = async (event) => {
     event.preventDefault();
     if (!email.trim()) {
       setError("Please enter your email.");
       return;
     }
     setError("");
-    setCode("");
-    setSecondsLeft(CODE_TTL_SECONDS);
-    setStep("code");
+    setSubmitting(true);
+    try {
+      await requestPasswordReset(email.trim());
+      setCode("");
+      setSecondsLeft(CODE_TTL_SECONDS);
+      setStep("code");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Couldn't send the code. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleResendCode = () => {
-    // TODO: trigger the backend to actually generate and email a new code
-    // once real auth is wired up -- this just resets the mock timer for now.
-    setCode("");
-    setSecondsLeft(CODE_TTL_SECONDS);
+  const handleResendCode = async () => {
     setError("");
+    setSubmitting(true);
+    try {
+      await requestPasswordReset(email.trim());
+      setCode("");
+      setSecondsLeft(CODE_TTL_SECONDS);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Couldn't resend the code. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleCodeSubmit = (event) => {
+  const handleCodeSubmit = async (event) => {
     event.preventDefault();
     if (codeExpired) {
       setError("This code has expired. Send a new one and try again.");
@@ -67,10 +85,18 @@ function ResetPassword() {
       return;
     }
     setError("");
-    setStep("password");
+    setSubmitting(true);
+    try {
+      await verifyResetCode(email.trim(), code);
+      setStep("password");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Invalid or expired code.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handlePasswordSubmit = (event) => {
+  const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     if (!newPassword || !confirmPassword) {
       setError("Please fill in both password fields.");
@@ -80,9 +106,20 @@ function ResetPassword() {
       setError("Passwords don't match.");
       return;
     }
+    if (newPassword.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     setError("");
     setSubmitting(true);
-    setStep("done");
+    try {
+      await confirmPasswordReset(email.trim(), code, newPassword);
+      setStep("done");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Couldn't reset your password. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const stepCopy = {
@@ -128,7 +165,7 @@ function ResetPassword() {
 
           {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" loading={submitting} className="w-full">
             Send reset code
           </Button>
         </form>
@@ -140,7 +177,7 @@ function ResetPassword() {
             We sent a 6-digit code to <span className="font-semibold text-slate-900">{email}</span>.
           </p>
 
-          <OtpCodeInput value={code} onChange={setCode} disabled={codeExpired} />
+          <OtpCodeInput value={code} onChange={setCode} disabled={codeExpired || submitting} />
 
           <p className={`text-center text-xs font-medium ${codeExpired ? "text-red-600" : "text-slate-500"}`}>
             {codeExpired ? "Code expired" : `Expires in ${formatTime(secondsLeft)}`}
@@ -148,7 +185,7 @@ function ResetPassword() {
 
           {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-          <Button type="submit" className="w-full" disabled={codeExpired}>
+          <Button type="submit" loading={submitting} className="w-full" disabled={codeExpired}>
             Verify code
           </Button>
 
@@ -157,7 +194,8 @@ function ResetPassword() {
             <button
               type="button"
               onClick={handleResendCode}
-              className="font-semibold text-brand-600 hover:text-brand-700"
+              disabled={submitting}
+              className="font-semibold text-brand-600 hover:text-brand-700 disabled:text-slate-400"
             >
               Resend code
             </button>
@@ -220,12 +258,13 @@ function ResetPassword() {
           <p className="text-sm text-slate-700">
             Your password has been reset. You can now log in with your new password.
           </p>
-          <Link
-            to="/login"
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
             className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/30 transition hover:bg-brand-700"
           >
             Back to log in
-          </Link>
+          </button>
         </div>
       )}
     </AuthLayout>

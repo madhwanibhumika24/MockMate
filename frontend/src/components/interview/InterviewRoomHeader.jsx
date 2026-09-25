@@ -36,11 +36,11 @@ function InterviewRoomHeader({
         <div className="flex items-center gap-3">
           {timeLabel && (
             <span
-              className={`inline-flex items-center gap-1 text-sm font-semibold tabular-nums ${
-                isTimeCritical ? "text-red-600" : "text-slate-500"
+              className={`inline-flex items-center gap-1.5 text-base font-semibold tabular-nums ${
+                isTimeCritical ? "text-red-600" : "text-red-400"
               }`}
             >
-              <ClockIcon className="h-4 w-4" />
+              <ClockIcon className="h-5 w-5" />
               {timeLabel}
             </span>
           )}

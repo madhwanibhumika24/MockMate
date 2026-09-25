@@ -233,12 +233,17 @@ def _find_or_create_oauth_user(db: Session, provider: str, profile: dict) -> Use
 def google_login(response: Response):
     state = secrets.token_urlsafe(24)
     redirect = RedirectResponse(url=build_google_auth_url(state))
+    # SameSite=None is required so this cookie survives the redirect back
+    # from Google/GitHub in production, where the frontend and backend are
+    # on different domains. Secure=True is required whenever SameSite=None
+    # is used, which is already the case outside local development.
+    cross_site = settings.environment != "development"
     redirect.set_cookie(
         key=OAUTH_STATE_COOKIE,
         value=state,
         httponly=True,
-        secure=settings.environment != "development",
-        samesite="lax",
+        secure=cross_site,
+        samesite="none" if cross_site else "lax",
         max_age=600,
         path="/",
     )
@@ -266,12 +271,17 @@ def google_callback(
 def github_login(response: Response):
     state = secrets.token_urlsafe(24)
     redirect = RedirectResponse(url=build_github_auth_url(state))
+    # SameSite=None is required so this cookie survives the redirect back
+    # from Google/GitHub in production, where the frontend and backend are
+    # on different domains. Secure=True is required whenever SameSite=None
+    # is used, which is already the case outside local development.
+    cross_site = settings.environment != "development"
     redirect.set_cookie(
         key=OAUTH_STATE_COOKIE,
         value=state,
         httponly=True,
-        secure=settings.environment != "development",
-        samesite="lax",
+        secure=cross_site,
+        samesite="none" if cross_site else "lax",
         max_age=600,
         path="/",
     )

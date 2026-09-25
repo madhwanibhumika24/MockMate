@@ -21,6 +21,7 @@ backend/data/raw/*
 !backend/data/raw/.gitkeep
 backend/data/vector_store/*
 !backend/data/vector_store/.gitkeep
+backend/data/*.db
 
 # OS / editor
 .DS_Store

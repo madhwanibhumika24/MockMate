@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+import InterviewShowcaseCard from "./InterviewShowcaseCard.jsx";
+
 const HEADING_LINE_1 = "Practice like it's the real thing";
 const HEADING_LINE_2 = "so the real thing feels easy";
 const LETTER_STEP = 0.028;
@@ -40,53 +42,6 @@ function renderAnimatedWords(text, startIndex) {
   });
 
   return { nodes, nextIndex: index };
-}
-
-// A small illustrative preview of what a session looks like -- fills the
-// empty space beside the hero copy on wide screens and shows, rather than
-// just tells, what MockMate does.
-function SamplePreviewCard() {
-  return (
-    <div className="animate-float card mx-auto max-w-sm rotate-1 shadow-xl">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-        <div>
-          <p className="text-xs font-medium text-slate-400">Frontend Engineer &middot; Session complete</p>
-          <p className="mt-0.5 text-sm font-semibold text-slate-900">Your feedback is ready</p>
-        </div>
-        <div className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-4 ring-brand-100">
-          82
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">Strengths</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-              Clear structure
-            </span>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-              Concrete example
-            </span>
-          </div>
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Improve</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-              Quantify impact
-            </span>
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">Slow down</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3 text-left text-sm text-slate-600">
-        &ldquo;Clear, well-structured answer with a strong technical example -- next time, tie it back to business
-        impact.&rdquo;
-      </div>
-    </div>
-  );
 }
 
 function Hero() {
@@ -163,7 +118,7 @@ function Hero() {
       </div>
 
       <div className="animate-fade-up hidden lg:block" style={{ animationDelay: `${contentDelay + 0.1}s` }}>
-        <SamplePreviewCard />
+        <InterviewShowcaseCard />
       </div>
     </div>
   );
