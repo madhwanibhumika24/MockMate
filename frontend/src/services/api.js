@@ -106,6 +106,13 @@ export const listGDCategories = () => apiClient.get("/group-discussion/categorie
 export const listGDTopics = (category) =>
   apiClient.get("/group-discussion/topics", { params: category ? { category } : {} });
 
+// Generates AI research content for one topic: an intro, points in favor and
+// against (each with an example), and a closing line. Stateless like Ask AI
+// -- nothing is saved, and calling it again regenerates fresh content.
+// Returns { intro, points_for: [{ point, example }], points_against: [...], conclusion }
+export const generateGDTopicBrief = (topicId) =>
+  apiClient.post(`/group-discussion/topics/${topicId}/brief`);
+
 export const googleLoginUrl = `${API_BASE_URL}/auth/google/login`;
 export const githubLoginUrl = `${API_BASE_URL}/auth/github/login`;
 

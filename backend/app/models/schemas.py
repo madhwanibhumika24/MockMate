@@ -120,6 +120,25 @@ class GDTopicResponse(BaseModel):
     prompt: str
 
 
+class GDPoint(BaseModel):
+    point: str
+    example: str = ""
+
+
+class GDKeyPhraseGroup(BaseModel):
+    category: str
+    phrases: list[str] = []
+
+
+class GDTopicBriefResponse(BaseModel):
+    intro: str
+    quick_facts: list[str] = []
+    points_for: list[GDPoint] = []
+    points_against: list[GDPoint] = []
+    conclusion: str = ""
+    key_phrases: list[GDKeyPhraseGroup] = []
+
+
 # ---------- Reference documents (RAG corpus) ----------
 
 

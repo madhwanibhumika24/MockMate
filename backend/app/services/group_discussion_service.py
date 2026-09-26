@@ -231,3 +231,11 @@ def list_topics(category: Optional[str] = None) -> List[GDTopic]:
     if category is None:
         return TOPICS
     return [topic for topic in TOPICS if topic["category"] == category]
+
+
+def get_topic(topic_id: str) -> Optional[GDTopic]:
+    """Looks up a single topic by id, or None if it doesn't exist."""
+    for topic in TOPICS:
+        if topic["id"] == topic_id:
+            return topic
+    return None
