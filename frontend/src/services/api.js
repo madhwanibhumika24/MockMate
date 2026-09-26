@@ -96,6 +96,16 @@ export const deleteMyResume = () => apiClient.delete("/profile/resume");
 // Stateless: no session is created, no answers/feedback are collected.
 export const generateAskAIQuestions = (prompt) => apiClient.post("/ask-ai/generate", { prompt });
 
+// ---------- Group Discussion ----------
+
+// Returns the fixed list of GD topic categories, e.g. ["Technology & AI", ...]
+export const listGDCategories = () => apiClient.get("/group-discussion/categories");
+
+// category is optional -- omit it (or pass undefined) to get every topic.
+// Returns [{ id, category, title, prompt }, ...]
+export const listGDTopics = (category) =>
+  apiClient.get("/group-discussion/topics", { params: category ? { category } : {} });
+
 export const googleLoginUrl = `${API_BASE_URL}/auth/google/login`;
 export const githubLoginUrl = `${API_BASE_URL}/auth/github/login`;
 

@@ -110,6 +110,16 @@ class AskAIResponse(BaseModel):
     questions: list[str] = []
 
 
+# ---------- Group Discussion ----------
+
+
+class GDTopicResponse(BaseModel):
+    id: str
+    category: str
+    title: str
+    prompt: str
+
+
 # ---------- Reference documents (RAG corpus) ----------
 
 

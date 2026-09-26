@@ -8,6 +8,7 @@ import StatsSummary from "../components/dashboard/StatsSummary.jsx";
 import ProgressChart from "../components/dashboard/ProgressChart.jsx";
 import ReadinessInsights from "../components/dashboard/ReadinessInsights.jsx";
 import AskAI from "../components/dashboard/AskAI.jsx";
+import GroupDiscussion from "../components/dashboard/GroupDiscussion.jsx";
 import Logo from "../components/common/Logo.jsx";
 import ThemeToggle from "../components/common/ThemeToggle.jsx";
 import ConfirmDialog from "../components/common/ConfirmDialog.jsx";
@@ -17,6 +18,7 @@ import { useAuth } from "../store/AuthContext.jsx";
 const TABS = [
   { id: "interview", label: "Practice Interview" },
   { id: "ask-ai", label: "Ask AI" },
+  { id: "group-discussion", label: "Group Discussion" },
   { id: "assessments", label: "Assessments" },
 ];
 
@@ -184,6 +186,7 @@ function Dashboard() {
             <InterviewTab sessions={sessions} sessionsLoading={sessionsLoading} />
           )}
           {activeTab === "ask-ai" && <AskAI />}
+          {activeTab === "group-discussion" && <GroupDiscussion />}
           {activeTab === "assessments" && <AssessmentsTab />}
         </div>
       </main>
