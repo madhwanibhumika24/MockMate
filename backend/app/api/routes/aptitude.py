@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.core.security import get_current_user
 from app.models.orm import User
 from app.models.schemas import (
+    AptitudeCustomQuizRequest,
     AptitudeQuizResponse,
     AptitudeSubmitRequest,
     AptitudeSubmitResponse,
@@ -48,6 +49,27 @@ def generate_quiz(
 
     try:
         return aptitude_quiz_service.generate_quiz(topic["title"], difficulty, count)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@router.post("/custom-topic/quiz", response_model=AptitudeQuizResponse)
+def generate_custom_quiz(
+    payload: AptitudeCustomQuizRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """Ask AI: generates a quiz for any topic the candidate types in, not
+    just the curated bank, for when a topic they want to practice isn't
+    listed. Uses the exact same generation logic as the curated-topic quiz
+    above; the only difference is where the topic text comes from."""
+    topic_text = payload.topic.strip()
+    if not topic_text:
+        raise HTTPException(status_code=400, detail="Please enter a topic to practice.")
+    if len(topic_text) > 100:
+        raise HTTPException(status_code=400, detail="Please keep the topic under 100 characters.")
+
+    try:
+        return aptitude_quiz_service.generate_quiz(topic_text, payload.difficulty, payload.count)
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 

@@ -1,15 +1,27 @@
 import { useEffect, useState } from "react";
 
-import { generateAptitudeQuiz, listAptitudeCategories, listAptitudeTopics, submitAptitudeQuiz } from "../../services/api.js";
+import {
+  generateAptitudeQuiz,
+  generateCustomAptitudeQuiz,
+  listAptitudeCategories,
+  listAptitudeTopics,
+  submitAptitudeQuiz,
+} from "../../services/api.js";
 import Button from "../common/Button.jsx";
 
 const DIFFICULTIES = [
-  { id: "easy", label: "Easy" },
-  { id: "medium", label: "Medium" },
-  { id: "hard", label: "Hard" },
+  { id: "easy", label: "Easy", description: "Warm-up questions, quick to solve", tone: "emerald" },
+  { id: "medium", label: "Medium", description: "Standard exam-level difficulty", tone: "amber" },
+  { id: "hard", label: "Hard", description: "Tricky, multi-step problems", tone: "red" },
 ];
 
-const QUESTION_COUNTS = [5, 10];
+const QUESTION_COUNT_OPTIONS = [
+  { value: 5, label: "5 questions", description: "~5 minutes" },
+  { value: 10, label: "10 questions", description: "~10 minutes" },
+];
+
+const MIN_QUESTION_COUNT = 3;
+const MAX_QUESTION_COUNT = 20;
 
 function BackIcon({ className }) {
   return (
@@ -51,6 +63,82 @@ function LightbulbIcon({ className }) {
   );
 }
 
+function CalculatorIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <path
+        d="M8 7h8M8 11.2h.01M12 11.2h.01M16 11.2h.01M8 15h.01M12 15h.01M16 15h.01M8 18.8h.01M12 18.8h.01"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ReasoningIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="2.1" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="18" cy="6" r="2.1" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="18" r="2.1" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M7.7 7.3L10.6 16M16.3 7.3L13.4 16M8.1 6h7.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function BookIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 5.5A2.5 2.5 0 016.5 3H12v16.5H6.5A2.5 2.5 0 014 17V5.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path
+        d="M20 5.5A2.5 2.5 0 0017.5 3H12v16.5h5.5A2.5 2.5 0 0020 17V5.5z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TargetIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+function SearchIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SparkleIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2-5.2-1.8 5.2-1.8L12 2.5z" />
+    </svg>
+  );
+}
+
+const CATEGORY_ICONS = {
+  "Quantitative Aptitude": CalculatorIcon,
+  "Logical Reasoning": ReasoningIcon,
+  "Verbal Ability": BookIcon,
+};
+
+function CategoryIcon({ category, className }) {
+  const IconComponent = CATEGORY_ICONS[category] || TargetIcon;
+  return <IconComponent className={className} />;
+}
+
 function CategoryPill({ active, children, onClick }) {
   return (
     <button
@@ -67,9 +155,66 @@ function CategoryPill({ active, children, onClick }) {
   );
 }
 
+const OPTION_CARD_TONES = {
+  brand: "border-brand-400 bg-brand-50/60 ring-1 ring-brand-400 dark:border-brand-600 dark:bg-brand-900/20",
+  emerald: "border-emerald-400 bg-emerald-50/60 ring-1 ring-emerald-400 dark:border-emerald-600 dark:bg-emerald-900/20",
+  amber: "border-amber-400 bg-amber-50/60 ring-1 ring-amber-400 dark:border-amber-600 dark:bg-amber-900/20",
+  red: "border-red-400 bg-red-50/60 ring-1 ring-red-400 dark:border-red-600 dark:bg-red-900/20",
+};
+
+const OPTION_CARD_CHECK_TONES = {
+  brand: "text-brand-600 dark:text-brand-400",
+  emerald: "text-emerald-600 dark:text-emerald-400",
+  amber: "text-amber-600 dark:text-amber-400",
+  red: "text-red-600 dark:text-red-400",
+};
+
+function OptionCard({ selected, title, description, tone = "brand", onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative flex flex-col gap-0.5 rounded-xl border px-4 py-3 text-left transition ${
+        selected
+          ? OPTION_CARD_TONES[tone]
+          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+      }`}
+    >
+      {selected && <CheckCircleIcon className={`absolute right-2.5 top-2.5 h-4 w-4 ${OPTION_CARD_CHECK_TONES[tone]}`} />}
+      <span className="pr-5 text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</span>
+      <span className="text-xs text-slate-500 dark:text-slate-400">{description}</span>
+    </button>
+  );
+}
+
 function TopicSetup({ topic, onBack, onStart, starting, error }) {
   const [difficulty, setDifficulty] = useState("medium");
   const [count, setCount] = useState(5);
+  const [customMode, setCustomMode] = useState(false);
+  const [customText, setCustomText] = useState("");
+
+  const handlePresetClick = (value) => {
+    setCustomMode(false);
+    setCount(value);
+  };
+
+  const handleCustomChange = (event) => {
+    const raw = event.target.value;
+    setCustomMode(true);
+    setCustomText(raw);
+    const parsed = Number(raw);
+    if (raw !== "" && Number.isInteger(parsed)) {
+      setCount(Math.max(MIN_QUESTION_COUNT, Math.min(MAX_QUESTION_COUNT, parsed)));
+    }
+  };
+
+  const handleCustomBlur = () => {
+    // Self-heal: an empty or invalid custom value snaps back to whatever
+    // the last valid count was, so the field never gets stuck unusable.
+    setCustomText(String(count));
+  };
+
+  const customIsInvalid = customMode && (customText === "" || !Number.isInteger(Number(customText)));
 
   return (
     <div className="space-y-5">
@@ -82,44 +227,98 @@ function TopicSetup({ topic, onBack, onStart, starting, error }) {
         Back to topics
       </button>
 
-      <div className="card space-y-4">
-        <div>
-          <span className="inline-flex w-fit items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
-            {topic.category}
-          </span>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">{topic.title}</h3>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{topic.description}</p>
+      <div className="card space-y-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
+            <CategoryIcon category={topic.category} className="h-6 w-6" />
+          </div>
+          <div>
+            <span className="inline-flex w-fit items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
+              {topic.category}
+            </span>
+            <h3 className="mt-1.5 text-lg font-semibold text-slate-900 dark:text-slate-100">{topic.title}</h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{topic.description}</p>
+          </div>
         </div>
+
+        <hr className="border-slate-100 dark:border-slate-800" />
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Difficulty</p>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
             {DIFFICULTIES.map((d) => (
-              <CategoryPill key={d.id} active={difficulty === d.id} onClick={() => setDifficulty(d.id)}>
-                {d.label}
-              </CategoryPill>
+              <OptionCard
+                key={d.id}
+                selected={difficulty === d.id}
+                title={d.label}
+                description={d.description}
+                tone={d.tone}
+                onClick={() => setDifficulty(d.id)}
+              />
             ))}
           </div>
         </div>
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Number of questions</p>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
-            {QUESTION_COUNTS.map((c) => (
-              <CategoryPill key={c} active={count === c} onClick={() => setCount(c)}>
-                {c} questions
-              </CategoryPill>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            {QUESTION_COUNT_OPTIONS.map((c) => (
+              <OptionCard
+                key={c.value}
+                selected={!customMode && count === c.value}
+                title={c.label}
+                description={c.description}
+                onClick={() => handlePresetClick(c.value)}
+              />
             ))}
+            <label
+              className={`relative flex flex-col gap-0.5 rounded-xl border px-4 py-3 text-left transition ${
+                customMode && !customIsInvalid
+                  ? OPTION_CARD_TONES.brand
+                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+              }`}
+            >
+              {customMode && !customIsInvalid && (
+                <CheckCircleIcon className={`absolute right-2.5 top-2.5 h-4 w-4 ${OPTION_CARD_CHECK_TONES.brand}`} />
+              )}
+              <span className="pr-5 text-sm font-semibold text-slate-900 dark:text-slate-100">Custom</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={MIN_QUESTION_COUNT}
+                max={MAX_QUESTION_COUNT}
+                value={customMode ? customText : ""}
+                onFocus={() => {
+                  if (!customMode) {
+                    setCustomMode(true);
+                    setCustomText(String(count));
+                  }
+                }}
+                onChange={handleCustomChange}
+                onBlur={handleCustomBlur}
+                placeholder={`${MIN_QUESTION_COUNT}-${MAX_QUESTION_COUNT}`}
+                className="mt-0.5 w-full bg-transparent text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none dark:text-slate-400"
+              />
+            </label>
           </div>
+          <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">
+            Pick a preset or type any number of questions from {MIN_QUESTION_COUNT} to {MAX_QUESTION_COUNT}.
+          </p>
         </div>
 
         {error && (
           <div className="rounded-lg bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-700 dark:text-red-300">{error}</div>
         )}
 
-        <Button loading={starting} onClick={() => onStart({ difficulty, count })}>
-          Start quiz
-        </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            <span className="font-semibold capitalize text-slate-900 dark:text-slate-100">{difficulty}</span> &middot; {count}{" "}
+            questions on <span className="font-semibold text-slate-900 dark:text-slate-100">{topic.title}</span>
+          </p>
+          <Button loading={starting} disabled={customIsInvalid} onClick={() => onStart({ difficulty, count })}>
+            Start quiz
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -308,6 +507,8 @@ function Assessments() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  const [customQuery, setCustomQuery] = useState("");
+
   useEffect(() => {
     listAptitudeCategories()
       .then(({ data }) => setCategories(data))
@@ -348,7 +549,10 @@ function Assessments() {
   const startQuiz = ({ difficulty, count }) => {
     setQuizStarting(true);
     setQuizError("");
-    generateAptitudeQuiz(selectedTopic.id, { difficulty, count })
+    const request = selectedTopic.isCustom
+      ? generateCustomAptitudeQuiz(selectedTopic.title, { difficulty, count })
+      : generateAptitudeQuiz(selectedTopic.id, { difficulty, count });
+    request
       .then(({ data }) => {
         setQuiz(data);
         setStage("quiz");
@@ -374,6 +578,19 @@ function Assessments() {
     setQuiz(null);
     setResult(null);
     setStage("browse");
+  };
+
+  const handleCustomSearch = (event) => {
+    event.preventDefault();
+    const query = customQuery.trim();
+    if (!query) return;
+    openTopic({
+      id: `custom-${Date.now()}`,
+      category: "Custom topic",
+      title: query,
+      description: "A topic you searched for.",
+      isCustom: true,
+    });
   };
 
   if (selectedTopic && stage === "setup") {
@@ -426,6 +643,32 @@ function Assessments() {
           </span>
         </div>
 
+        <div className="mt-4 rounded-xl border border-brand-100 dark:border-brand-900/40 bg-brand-50/50 dark:bg-brand-950/20 p-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-700 dark:text-brand-400">
+            <SparkleIcon className="h-3.5 w-3.5" />
+            Ask AI for a topic
+          </div>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Not in the list below? Type any aptitude topic and get a quiz for it.
+          </p>
+          <form onSubmit={handleCustomSearch} className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={customQuery}
+                onChange={(event) => setCustomQuery(event.target.value)}
+                maxLength={100}
+                placeholder="e.g. Permutations and Combinations, Clocks and Calendars"
+                className="input-field pl-9"
+              />
+            </div>
+            <Button type="submit" disabled={!customQuery.trim()} className="sm:flex-none">
+              Search
+            </Button>
+          </form>
+        </div>
+
         <div className="mt-4 flex flex-wrap gap-1.5">
           <CategoryPill active={activeCategory === null} onClick={() => setActiveCategory(null)}>
             All topics
@@ -450,7 +693,8 @@ function Assessments() {
         <div className="grid gap-4 sm:grid-cols-2">
           {topics.map((topic) => (
             <div key={topic.id} className="card flex flex-col gap-2">
-              <span className="inline-flex w-fit items-center rounded-full bg-brand-50 dark:bg-brand-900/40 px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
+              <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-brand-50 dark:bg-brand-900/40 px-2.5 py-1 text-xs font-semibold text-brand-600 dark:text-brand-400">
+                <CategoryIcon category={topic.category} className="h-3.5 w-3.5" />
                 {topic.category}
               </span>
               <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{topic.title}</h4>

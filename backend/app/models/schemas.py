@@ -182,6 +182,12 @@ class AptitudeQuizResponse(BaseModel):
     questions: list[AptitudeQuizQuestion] = []
 
 
+class AptitudeCustomQuizRequest(BaseModel):
+    topic: str
+    difficulty: str = "medium"
+    count: int = 5
+
+
 class AptitudeAnswer(BaseModel):
     id: str
     token: str

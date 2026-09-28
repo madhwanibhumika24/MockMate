@@ -154,6 +154,12 @@ export const generateAptitudeQuiz = (topicId, { difficulty = "medium", count = 5
 // selected_index, correct_index, is_correct, explanation }, ...] }.
 export const submitAptitudeQuiz = (answers) => apiClient.post("/aptitude/submit", { answers });
 
+// "Ask AI" -- generates a quiz for any topic the candidate types in, not
+// just the curated bank, for when a topic isn't listed. Same response
+// shape as generateAptitudeQuiz above.
+export const generateCustomAptitudeQuiz = (topic, { difficulty = "medium", count = 5 } = {}) =>
+  apiClient.post("/aptitude/custom-topic/quiz", { topic, difficulty, count });
+
 export const googleLoginUrl = `${API_BASE_URL}/auth/google/login`;
 export const githubLoginUrl = `${API_BASE_URL}/auth/github/login`;
 

@@ -31,7 +31,7 @@ from app.core.config import get_settings
 DIFFICULTIES = {"easy", "medium", "hard"}
 DEFAULT_DIFFICULTY = "medium"
 MIN_COUNT = 3
-MAX_COUNT = 10
+MAX_COUNT = 20
 DEFAULT_COUNT = 5
 
 APTITUDE_QUIZ_SYSTEM_PROMPT = """\
