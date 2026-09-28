@@ -120,6 +120,26 @@ class GDTopicResponse(BaseModel):
     prompt: str
 
 
+class GDCustomTopicRequest(BaseModel):
+    topic: str
+
+
+class GDChatTurn(BaseModel):
+    role: str  # "user" | "ai"
+    content: str
+
+
+class GDDiscussRequest(BaseModel):
+    topic_title: str
+    topic_prompt: str = ""
+    message: str
+    history: list[GDChatTurn] = []
+
+
+class GDDiscussResponse(BaseModel):
+    reply: str
+
+
 class GDPoint(BaseModel):
     point: str
     example: str = ""
@@ -137,6 +157,56 @@ class GDTopicBriefResponse(BaseModel):
     points_against: list[GDPoint] = []
     conclusion: str = ""
     key_phrases: list[GDKeyPhraseGroup] = []
+
+
+# ---------- Aptitude Assessments ----------
+
+
+class AptitudeTopicResponse(BaseModel):
+    id: str
+    category: str
+    title: str
+    description: str
+
+
+class AptitudeQuizQuestion(BaseModel):
+    id: str
+    question: str
+    options: list[str]
+    token: str
+
+
+class AptitudeQuizResponse(BaseModel):
+    topic_title: str
+    difficulty: str
+    questions: list[AptitudeQuizQuestion] = []
+
+
+class AptitudeAnswer(BaseModel):
+    id: str
+    token: str
+    selected_index: Optional[int] = None
+
+
+class AptitudeSubmitRequest(BaseModel):
+    answers: list[AptitudeAnswer]
+
+
+class AptitudeResultItem(BaseModel):
+    id: str
+    question: str
+    options: list[str]
+    selected_index: Optional[int] = None
+    correct_index: int
+    is_correct: bool
+    explanation: str
+
+
+class AptitudeSubmitResponse(BaseModel):
+    score: float
+    correct_count: int
+    total: int
+    results: list[AptitudeResultItem] = []
 
 
 # ---------- Reference documents (RAG corpus) ----------

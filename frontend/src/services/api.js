@@ -113,6 +113,47 @@ export const listGDTopics = (category) =>
 export const generateGDTopicBrief = (topicId) =>
   apiClient.post(`/group-discussion/topics/${topicId}/brief`);
 
+// "Search topics with AI" -- researches any topic the candidate types in,
+// not just the curated bank. Same response shape as generateGDTopicBrief above.
+export const generateCustomGDTopicBrief = (topic) =>
+  apiClient.post("/group-discussion/custom-topic/brief", { topic });
+
+// "Discuss with AI" -- a free-form follow-up chat about a topic, layered on
+// top of its research brief. Stateless on the backend: pass the running
+// conversation as `history` ([{ role: "user" | "ai", content }, ...], not
+// including the new `message`) with every call. Returns { reply }.
+export const discussGDTopic = ({ topicTitle, topicPrompt, message, history }) =>
+  apiClient.post("/group-discussion/discuss", {
+    topic_title: topicTitle,
+    topic_prompt: topicPrompt || "",
+    message,
+    history,
+  });
+
+// ---------- Aptitude Assessments ----------
+
+// Returns the fixed list of aptitude categories, e.g. ["Quantitative Aptitude", ...]
+export const listAptitudeCategories = () => apiClient.get("/aptitude/categories");
+
+// category is optional -- omit it (or pass undefined) to get every topic.
+// Returns [{ id, category, title, description }, ...]
+export const listAptitudeTopics = (category) =>
+  apiClient.get("/aptitude/topics", { params: category ? { category } : {} });
+
+// Generates an MCQ quiz for one topic. Stateless like Ask AI -- nothing is
+// saved. Returns { topic_title, difficulty, questions: [{ id, question,
+// options, token }, ...] } -- notice there's no correct answer anywhere in
+// this response; it's sealed inside each question's "token" until you call
+// submitAptitudeQuiz below.
+export const generateAptitudeQuiz = (topicId, { difficulty = "medium", count = 5 } = {}) =>
+  apiClient.post(`/aptitude/topics/${topicId}/quiz`, null, { params: { difficulty, count } });
+
+// Grades a completed quiz. `answers` is [{ id, token, selected_index }, ...]
+// -- selected_index may be null for a question the candidate skipped.
+// Returns { score, correct_count, total, results: [{ id, question, options,
+// selected_index, correct_index, is_correct, explanation }, ...] }.
+export const submitAptitudeQuiz = (answers) => apiClient.post("/aptitude/submit", { answers });
+
 export const googleLoginUrl = `${API_BASE_URL}/auth/google/login`;
 export const githubLoginUrl = `${API_BASE_URL}/auth/github/login`;
 

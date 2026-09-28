@@ -9,6 +9,7 @@ import ProgressChart from "../components/dashboard/ProgressChart.jsx";
 import ReadinessInsights from "../components/dashboard/ReadinessInsights.jsx";
 import AskAI from "../components/dashboard/AskAI.jsx";
 import GroupDiscussion from "../components/dashboard/GroupDiscussion.jsx";
+import Assessments from "../components/dashboard/Assessments.jsx";
 import Logo from "../components/common/Logo.jsx";
 import ThemeToggle from "../components/common/ThemeToggle.jsx";
 import ConfirmDialog from "../components/common/ConfirmDialog.jsx";
@@ -41,20 +42,6 @@ function InterviewTab({ sessions, sessionsLoading }) {
       </div>
 
       <InterviewHistory sessions={sessions} loading={sessionsLoading} />
-    </div>
-  );
-}
-
-function AssessmentsTab() {
-  return (
-    <div className="card flex flex-col items-center justify-center gap-2 py-12 text-center">
-      <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
-        Coming soon
-      </span>
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Skill assessments</h3>
-      <p className="max-w-sm text-sm text-slate-600 dark:text-slate-400">
-        Timed, role-specific assessments to benchmark your skills are on the way.
-      </p>
     </div>
   );
 }
@@ -187,7 +174,7 @@ function Dashboard() {
           )}
           {activeTab === "ask-ai" && <AskAI />}
           {activeTab === "group-discussion" && <GroupDiscussion />}
-          {activeTab === "assessments" && <AssessmentsTab />}
+          {activeTab === "assessments" && <Assessments />}
         </div>
       </main>
 
