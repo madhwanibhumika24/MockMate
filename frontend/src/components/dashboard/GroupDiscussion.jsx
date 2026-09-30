@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { generateGDTopicBrief, listGDCategories, listGDTopics } from "../../services/api.js";
+import {
+  discussGDTopic,
+  generateCustomGDTopicBrief,
+  generateGDTopicBrief,
+  listGDCategories,
+  listGDTopics,
+} from "../../services/api.js";
 import Button from "../common/Button.jsx";
 
 function BackIcon({ className }) {
@@ -71,6 +77,23 @@ function XCircleIcon({ className }) {
   );
 }
 
+function SearchIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SparkleIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2-5.2-1.8 5.2-1.8L12 2.5z" />
+    </svg>
+  );
+}
+
 function CategoryPill({ active, children, onClick }) {
   return (
     <button
@@ -131,6 +154,120 @@ function PointList({ heading, tone, points }) {
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+function GDChatBubble({ from, children }) {
+  const isAI = from === "ai";
+  return (
+    <div className={`flex items-end gap-2 ${isAI ? "justify-start" : "flex-row-reverse justify-start"}`}>
+      <span
+        className={`flex h-6 w-6 flex-none select-none items-center justify-center rounded-full text-[10px] font-semibold ${
+          isAI ? "bg-brand-100 dark:bg-brand-800/50 text-brand-700 dark:text-brand-300" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+        }`}
+      >
+        {isAI ? "AI" : "ME"}
+      </span>
+      <div
+        className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${
+          isAI ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200" : "bg-brand-600 text-white"
+        }`}
+      >
+        <p className="whitespace-pre-wrap">{children}</p>
+      </div>
+    </div>
+  );
+}
+
+function GDTypingBubble() {
+  return (
+    <div className="flex items-end gap-2 justify-start">
+      <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-100 dark:bg-brand-800/50 text-[10px] font-semibold text-brand-700 dark:text-brand-300">
+        AI
+      </span>
+      <div className="flex items-center gap-1 rounded-2xl bg-slate-100 dark:bg-slate-800 px-3.5 py-3 shadow-sm">
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "0ms" }} />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "150ms" }} />
+        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" style={{ animationDelay: "300ms" }} />
+      </div>
+    </div>
+  );
+}
+
+function TopicDiscussion({ topic }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [chatError, setChatError] = useState("");
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    setMessages([]);
+    setInput("");
+    setChatError("");
+  }, [topic.id]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [messages, sending]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const text = input.trim();
+    if (!text || sending) return;
+
+    const history = messages.map(({ role, content }) => ({ role, content }));
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setInput("");
+    setChatError("");
+    setSending(true);
+
+    discussGDTopic({ topicTitle: topic.title, topicPrompt: topic.prompt, message: text, history })
+      .then(({ data }) => setMessages((prev) => [...prev, { role: "ai", content: data.reply }]))
+      .catch((err) => setChatError(err.response?.data?.detail || "Couldn't get a response right now. Please try again."))
+      .finally(() => setSending(false));
+  };
+
+  return (
+    <div className="card">
+      <div className="flex items-center gap-2">
+        <MessageIcon className="h-5 w-5 flex-none text-brand-600 dark:text-brand-400" />
+        <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Discuss with AI</h4>
+      </div>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        Ask a follow-up, dig into a point, or push back on an argument -- keep exploring before you go into the
+        discussion.
+      </p>
+
+      {messages.length > 0 && (
+        <div className="mt-4 max-h-96 space-y-3 overflow-y-auto pr-1">
+          {messages.map((message, index) => (
+            <GDChatBubble key={index} from={message.role}>
+              {message.content}
+            </GDChatBubble>
+          ))}
+          {sending && <GDTypingBubble />}
+          <div ref={endRef} />
+        </div>
+      )}
+
+      {chatError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{chatError}</p>}
+
+      <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(event) => setInput(event.target.value)}
+          maxLength={800}
+          disabled={sending}
+          placeholder={'e.g. "Give me a stronger counterpoint" or "What\'s a real example of this?"'}
+          className="input-field flex-1"
+        />
+        <Button type="submit" loading={sending} disabled={!input.trim()}>
+          Send
+        </Button>
+      </form>
     </div>
   );
 }
@@ -241,6 +378,8 @@ function TopicBrief({ topic, brief, loading, error, onRegenerate, onBack }) {
           <Button variant="secondary" onClick={onRegenerate}>
             Regenerate
           </Button>
+
+          <TopicDiscussion topic={topic} />
         </>
       )}
     </div>
@@ -258,6 +397,8 @@ function GroupDiscussion() {
   const [brief, setBrief] = useState(null);
   const [briefLoading, setBriefLoading] = useState(false);
   const [briefError, setBriefError] = useState("");
+
+  const [customQuery, setCustomQuery] = useState("");
 
   useEffect(() => {
     listGDCategories()
@@ -288,15 +429,23 @@ function GroupDiscussion() {
     };
   }, [activeCategory]);
 
-  const researchTopic = (topic) => {
+  const runBrief = (topic) => {
     setSelectedTopic(topic);
     setBrief(null);
     setBriefError("");
     setBriefLoading(true);
-    generateGDTopicBrief(topic.id)
+    const request = topic.isCustom ? generateCustomGDTopicBrief(topic.title) : generateGDTopicBrief(topic.id);
+    request
       .then(({ data }) => setBrief(data))
       .catch((err) => setBriefError(err.response?.data?.detail || "Couldn't research this topic right now. Please try again."))
       .finally(() => setBriefLoading(false));
+  };
+
+  const handleCustomSearch = (event) => {
+    event.preventDefault();
+    const query = customQuery.trim();
+    if (!query) return;
+    runBrief({ id: `custom-${Date.now()}`, category: "Custom topic", title: query, prompt: "A topic you searched for.", isCustom: true });
   };
 
   if (selectedTopic) {
@@ -306,7 +455,7 @@ function GroupDiscussion() {
         brief={brief}
         loading={briefLoading}
         error={briefError}
-        onRegenerate={() => researchTopic(selectedTopic)}
+        onRegenerate={() => runBrief(selectedTopic)}
         onBack={() => setSelectedTopic(null)}
       />
     );
@@ -327,6 +476,29 @@ function GroupDiscussion() {
           <span className="inline-flex flex-none items-center rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
             Live discussion coming soon
           </span>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-brand-100 dark:border-brand-900/40 bg-brand-50/50 dark:bg-brand-950/20 p-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-brand-700 dark:text-brand-400">
+            <SparkleIcon className="h-3.5 w-3.5" />
+            Search topics with AI
+          </div>
+          <form onSubmit={handleCustomSearch} className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={customQuery}
+                onChange={(event) => setCustomQuery(event.target.value)}
+                maxLength={200}
+                placeholder="Not in the list? Type any GD topic, e.g. “Should exams be abolished?”"
+                className="input-field pl-9"
+              />
+            </div>
+            <Button type="submit" disabled={!customQuery.trim()} className="sm:flex-none">
+              Search
+            </Button>
+          </form>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
@@ -358,7 +530,7 @@ function GroupDiscussion() {
               </span>
               <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{topic.title}</h4>
               <p className="text-sm text-slate-600 dark:text-slate-400">{topic.prompt}</p>
-              <Button className="mt-2 self-start" onClick={() => researchTopic(topic)}>
+              <Button className="mt-2 self-start" onClick={() => runBrief(topic)}>
                 Research this topic
               </Button>
             </div>

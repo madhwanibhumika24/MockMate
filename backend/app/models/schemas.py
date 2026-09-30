@@ -188,6 +188,17 @@ class AptitudeCustomQuizRequest(BaseModel):
     count: int = 5
 
 
+class AptitudeFormulaSheetResponse(BaseModel):
+    topic_title: str
+    formulas: list[str] = []
+    example: str = ""
+    source: str = "verified"  # "verified" (curated, retrieval-grounded) | "ai_generated" (Ask AI fallback)
+
+
+class AptitudeCustomFormulaSheetRequest(BaseModel):
+    topic: str
+
+
 class AptitudeAnswer(BaseModel):
     id: str
     token: str

@@ -16,21 +16,10 @@ httpx==0.28.1  # bumped from 0.27.0: google-genai requires httpx>=0.28.1
 bcrypt==4.0.1
 PyJWT==2.8.0
 
-# Deferred: chromadb / langchain-chroma need a C++ compiler to build on
-# Windows (chroma-hnswlib has no prebuilt wheel for this Python version).
-# Add these back once either Build Tools for Visual Studio are installed, or
-# we pick versions with a prebuilt Windows wheel, whichever comes first --
-# needed only once we actually start building the RAG/vector-search feature.
-# chromadb==0.5.3
-# langchain-chroma==0.1.2
-
-# Deferred: langchain / langchain-community / langchain-openai dropped
-# entirely (not just for RAG) -- langchain_openai pulls in tiktoken, whose
-# native _tiktoken module gets blocked by this machine's Application Control
-# policy. interview_service.py / feedback_service.py now call the plain
-# `openai` package directly instead, which has no tiktoken dependency for
-# this use case. If RAG work resumes, wire embeddings via `openai` directly
-# too rather than langchain_openai.OpenAIEmbeddings, for the same reason.
-# langchain==0.2.6
-# langchain-community==0.2.6
-# langchain-openai==0.1.13
+# chromadb / langchain-chroma / langchain-openai are intentionally NOT used:
+# chromadb needs a C++ compiler to build on Windows (chroma-hnswlib has no
+# prebuilt wheel here), and langchain-openai pulls in tiktoken, whose native
+# module is blocked by this machine's Application Control policy. The RAG
+# pipeline (app/rag/) instead embeds via Gemini (already installed above,
+# google-genai) and stores vectors in a small dependency-free JSON store
+# (app/rag/vector_store.py) -- no extra packages needed for RAG at all.

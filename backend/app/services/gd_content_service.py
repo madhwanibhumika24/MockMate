@@ -135,7 +135,9 @@ def generate_topic_brief(topic_title: str, topic_prompt: str) -> dict:
     client = _get_client()
     settings = get_settings()
 
-    user_input = f"GD Topic: {topic_title}\nFraming: {topic_prompt}"
+    user_input = f"GD Topic: {topic_title}"
+    if topic_prompt:
+        user_input += f"\nFraming: {topic_prompt}"
 
     try:
         interaction = client.interactions.create(

@@ -15,13 +15,28 @@ a dependency) instead of the answer: the token is the only place the
 correct index and explanation live until the candidate submits, and only
 the backend holds the key needed to decrypt it. This avoids needing any new
 database table or session state for grading.
+
+There's also nothing that guarantees a generated question is actually
+correct -- this is still a single, unverified LLM call. Three things narrow
+that risk without adding a second AI call: the prompt requires the model to
+work the question out step by step before committing to an answer (a
+"working" field ordered right before "correct_index" in the JSON shape, so
+the model reasons before it answers rather than after); for curated topics,
+generate_quiz can be given `reference` text (the same verified formulas
+used by the Formula Sheet feature -- see aptitude_formula_service.py) so
+generation is grounded in checked material instead of the model's memory;
+and generation runs at a lower temperature than the rest of this app's
+generation calls, favoring consistency over variety. None of this is a
+guarantee -- an "Ask AI" custom topic has no reference material to ground
+against, and even grounded, reasoned generation can still get something
+wrong.
 """
 
 import base64
 import hashlib
 import json
 from functools import lru_cache
-from typing import List
+from typing import List, Optional
 
 from cryptography.fernet import Fernet, InvalidToken
 from google import genai
@@ -40,27 +55,37 @@ for placement/entrance exams, in the style of IndiaBix, GeeksforGeeks, and \
 PrepInsta practice tests.
 
 You will be given a topic, a difficulty level, and how many questions to \
-generate. Generate exactly that many original multiple-choice questions on \
-that topic, at that difficulty.
+generate, and sometimes a block of verified formulas/rules for the topic. \
+Generate exactly the requested number of original multiple-choice \
+questions on that topic, at that difficulty. When verified formulas are \
+given, base every question strictly on them rather than on anything you \
+recall independently -- treat them as the source of truth for this topic.
 
 Rules for every question:
 - Exactly 4 answer options, plausible and mutually exclusive -- distractors \
   should reflect common calculation mistakes, not random or obviously-wrong \
   values.
 - Exactly one option is correct.
-- Numeric questions must have a single, unambiguous correct numeric answer \
-  -- work it out carefully before writing the options.
+- For "working", solve the question yourself, step by step, before you \
+  decide which option is correct -- do not pick an option first and \
+  rationalize it afterward. If your own worked answer doesn't match any of \
+  the four options, fix the options so one of them does, rather than \
+  setting "correct_index" to the closest one.
+- Numeric questions must have a single, unambiguous correct numeric answer.
 - Keep each question self-contained. For reading comprehension, include a \
   short passage inline in the question text.
 - Write a brief 1-2 sentence explanation of why the correct answer is \
-  right (the method or reasoning, not just restating the answer).
+  right (the method or reasoning, not just restating the answer) -- this \
+  can summarize "working" rather than repeat it verbatim.
 - Never repeat the same question twice in one set.
 
 Respond with ONLY a JSON object (no markdown fences, no commentary) with \
-exactly this shape:
+exactly this shape, with the keys for each question in this exact order:
 {"questions": [{"question": "...", "options": ["...", "...", "...", "..."], \
-"correct_index": 0, "explanation": "..."}]}
-"correct_index" is the 0-based index into "options" of the correct answer.
+"working": "...", "correct_index": 0, "explanation": "..."}]}
+"working" is your own step-by-step solution, computed independently of the \
+options. "correct_index" is the 0-based index into "options" of whichever \
+option matches the answer you derived in "working".
 """
 
 
@@ -101,8 +126,19 @@ def _decrypt_answer(token: str) -> dict:
         raise RuntimeError("One of your answers couldn't be verified. Please retake the quiz.") from exc
 
 
-def generate_quiz(topic_title: str, difficulty: str = DEFAULT_DIFFICULTY, count: int = DEFAULT_COUNT) -> dict:
+def generate_quiz(
+    topic_title: str,
+    difficulty: str = DEFAULT_DIFFICULTY,
+    count: int = DEFAULT_COUNT,
+    reference: Optional[str] = None,
+) -> dict:
     """Generates a set of MCQs for one aptitude topic.
+
+    `reference`, if given, is verified formulas/rules text for this topic
+    (see aptitude_formula_service.get_formula_sheet) that the model is told
+    to treat as its source of truth, instead of generating purely from
+    memory -- only available for the 15 curated topics, since an "Ask AI"
+    custom topic has no matching reference content.
 
     Returns {"topic_title", "difficulty", "questions": [{"id", "question",
     "options", "token"}, ...]} -- notice there is no correct answer or
@@ -118,13 +154,17 @@ def generate_quiz(topic_title: str, difficulty: str = DEFAULT_DIFFICULTY, count:
     count = max(MIN_COUNT, min(MAX_COUNT, count))
 
     user_input = f"Topic: {topic_title}\nDifficulty: {difficulty}\nNumber of questions: {count}"
+    if reference:
+        user_input += f"\n\nVerified formulas/rules for this topic (use these, not your own memory):\n{reference}"
 
     try:
         interaction = client.interactions.create(
             model=settings.gemini_model,
             system_instruction=APTITUDE_QUIZ_SYSTEM_PROMPT,
             input=user_input,
-            generation_config={"temperature": 0.7},
+            # Lower than this app's other generation calls (0.6-0.7) --
+            # quizzes favor getting the answer right over sounding varied.
+            generation_config={"temperature": 0.4},
             response_format={"mime_type": "application/json"},
         )
         data = json.loads(interaction.output_text.strip())

@@ -12,12 +12,14 @@ class Settings(BaseSettings):
     # for "Sign in with Google" OAuth, a completely separate credential.
     google_api_key: str = ""
     gemini_model: str = "gemini-3.5-flash-lite"
-    # No longer used by interview_service/feedback_service (switched to
-    # Gemini) -- kept only because the deferred RAG pipeline
-    # (app/rag/embeddings.py) still references it, until that's ported too.
+    # Not used anywhere -- interview_service/feedback_service use Gemini, and
+    # the RAG pipeline (app/rag/embeddings.py) now embeds via Gemini too.
+    # Kept only so an old .env with this key set doesn't fail to load.
     openai_api_key: str = ""
     database_url: str = "sqlite:///./data/mockmate.db"
-    vector_store_backend: str = "chroma"
+    # "simple" = app/rag/vector_store.py's dependency-free JSON store (see
+    # that file for why Chroma isn't used).
+    vector_store_backend: str = "simple"
     vector_store_path: str = "./data/vector_store"
     cors_origins: str = "http://localhost:5173"
 
